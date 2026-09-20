@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
@@ -15,6 +16,7 @@ export function SplashScreen({ navigation }: Props) {
 
   return (
     <LinearGradient colors={['#eef1f5', '#e6e9ef']} style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <View style={styles.content}>
         <View style={styles.orbWrap}>
           <LinearGradient
@@ -29,12 +31,14 @@ export function SplashScreen({ navigation }: Props) {
         <Text style={styles.wordmark}>Linker</Text>
         <Text style={styles.tag}>Save today.{'\n'}Explore tomorrow.</Text>
       </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  safe: { flex: 1 },
   content: {
     flex: 1,
     alignItems: 'center',

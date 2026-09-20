@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Icon, IconName } from './Icon';
 import { colors } from '../theme';
@@ -16,8 +17,9 @@ const TABS: { name: string; label: string; icon: IconName }[] = [
 ];
 
 export function BottomNav({ state, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, { paddingBottom: Math.max(20, insets.bottom) }]}>
       {TABS.map((t) => {
         const route = state.routes.find((r) => r.name === t.name);
         const index = route ? state.routes.indexOf(route) : -1;
@@ -49,7 +51,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 10,
     paddingHorizontal: 8,
-    paddingBottom: 20,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.screenBg,
