@@ -1,0 +1,26 @@
+# Expo / React Native
+node_modules/
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro / debug
+npm-debug.*
+yarn-debug.*
+yarn-error.log
+
+# Env / secrets — never commit service-role keys
+.env
+.env.local
+.env.*.local
+supabase/.branches
+supabase/.temp
+
+# OS / editor
+.DS_Store
+*.orig
