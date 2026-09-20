@@ -1,4 +1,4 @@
-import { isValidUrl, normalizeUrl, extractDomain } from './url';
+import { isValidUrl, normalizeUrl, extractDomain, faviconUrl } from './url';
 
 describe('url utils', () => {
   test('validates http(s) only', () => {
@@ -17,5 +17,13 @@ describe('url utils', () => {
   test('extracts domain without www', () => {
     expect(extractDomain('https://www.nngroup.com/a')).toBe('nngroup.com');
     expect(extractDomain('not a url with spaces')).toBe('');
+  });
+
+  test('builds favicon url for a domain', () => {
+    expect(faviconUrl('nngroup.com')).toBe(
+      'https://www.google.com/s2/favicons?domain=nngroup.com&sz=64',
+    );
+    expect(faviconUrl('www.nngroup.com', 128)).toContain('sz=128');
+    expect(faviconUrl('')).toBe('');
   });
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,6 +7,8 @@ import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { mockLinks, mockCollections } from '../../utils/mockData';
 import { PrimaryButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
+import { useLinkPreview } from './useLinkPreview';
+import { faviconUrl } from '../../utils/url';
 import { colors } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
@@ -17,6 +19,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     mockLinks.find((l) => l.id === 'l-sleep') ??
     mockLinks[0];
   const collection = mockCollections[0];
+  const { metadata } = useLinkPreview(link.original_url);
+  const [faviconFailed, setFaviconFailed] = useState(false);
+
+  useEffect(() => {
+    setFaviconFailed(false);
+  }, [link.id]);
+
+  const bannerUri = link.preview_image_url ?? metadata?.preview_image_url ?? null;
+  const iconUri = faviconFailed ? null : faviconUrl(link.source_domain);
+  const description = link.description ?? metadata?.description ?? '';
 
   const openLink = async () => {
     try {
@@ -37,6 +49,15 @@ export function LinkDetailScreen({ route, navigation }: Props) {
         end={{ x: 1, y: 1 }}
         style={styles.hero}
       >
+        {bannerUri ? (
+          <Image
+            source={{ uri: bannerUri }}
+            style={styles.heroImage}
+            resizeMode="cover"
+            accessibilityRole="image"
+            accessibilityLabel="Link preview banner"
+          />
+        ) : null}
         <View style={styles.heroGlow} />
         <View style={styles.floating}>
           <Pressable
@@ -55,15 +76,25 @@ export function LinkDetailScreen({ route, navigation }: Props) {
       <View style={styles.body}>
         <Text style={styles.title}>{link.title}</Text>
         <View style={styles.source}>
-          <LinearGradient
-            colors={['#3a6288', '#152a44']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.sourceDot}
-          />
+          {iconUri ? (
+            <Image
+              source={{ uri: iconUri }}
+              style={styles.favicon}
+              onError={() => setFaviconFailed(true)}
+              accessibilityRole="image"
+              accessibilityLabel={`${link.source_domain} icon`}
+            />
+          ) : (
+            <LinearGradient
+              colors={['#3a6288', '#152a44']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.sourceDot}
+            />
+          )}
           <Text style={styles.sourceText}>{link.source_domain}</Text>
         </View>
-        <Text style={styles.desc}>{link.description}</Text>
+        {description ? <Text style={styles.desc}>{description}</Text> : null}
         <PrimaryButton title="Open Link" icon="external" onPress={openLink} />
         <View style={styles.row}>
           <Text style={styles.rowText}>Add to collection</Text>
@@ -86,6 +117,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.screenBg },
   hero: { height: 156, overflow: 'hidden' },
+  heroImage: { position: 'absolute', inset: 0, width: '100%', height: '100%' },
   heroGlow: {
     position: 'absolute',
     right: -30,
@@ -118,6 +150,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 19, fontWeight: '800', lineHeight: 24, letterSpacing: -0.2, color: colors.textPrimary },
   source: { flexDirection: 'row', alignItems: 'center', gap: 7, marginVertical: 9 },
   sourceDot: { width: 15, height: 15, borderRadius: 5 },
+  favicon: { width: 16, height: 16, borderRadius: 4, backgroundColor: colors.screenBgAlt },
   sourceText: { fontSize: 11.5, fontWeight: '500', color: colors.textTertiary },
   desc: { fontSize: 12.5, lineHeight: 19, color: colors.textSecondary, marginBottom: 12 },
   row: {
