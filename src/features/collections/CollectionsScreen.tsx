@@ -9,6 +9,7 @@ import { AppHeader, RoundIconButton } from '../../components/AppHeader';
 import { Icon } from '../../components/Icon';
 import { CollectionCard } from '../../components/ListItems';
 import { mockCollections } from '../../utils/mockData';
+import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 type Props = CompositeScreenProps<
@@ -17,20 +18,21 @@ type Props = CompositeScreenProps<
 >;
 
 export function CollectionsScreen({ navigation }: Props) {
+  const v = useRefScale();
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <AppHeader
         title="Collections"
         right={
           <RoundIconButton label="Create collection">
-            <Icon name="plus" size={15} color="#fff" />
+            <Icon name="plus" size={v(15)} color="#fff" />
           </RoundIconButton>
         }
       />
       <FlatList
         data={mockCollections}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingHorizontal: v(20), paddingBottom: v(16) }]}
         renderItem={({ item }) => (
           <CollectionCard
             collection={item}
@@ -44,5 +46,5 @@ export function CollectionsScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.screenBg },
-  list: { paddingHorizontal: 20, paddingBottom: 16 },
+  list: {},
 });

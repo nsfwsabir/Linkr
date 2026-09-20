@@ -5,11 +5,13 @@ import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { Screen } from '../../components/Screen';
 import { OutlineButton } from '../../components/Buttons';
 import { useAuth } from '../../app/providers/AuthProvider';
-import { colors, typography } from '../../theme';
+import { useRefScale } from '../../utils/useRefScale';
+import { colors } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
 export function SignInScreen({ navigation }: Props) {
+  const v = useRefScale();
   const { signInWithGoogle, signInMock, isConfigured } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -28,10 +30,12 @@ export function SignInScreen({ navigation }: Props) {
 
   return (
     <Screen padded={false}>
-      <View style={styles.content}>
+      <View style={[styles.content, { gap: v(38), paddingHorizontal: v(24) }]}>
         <View style={styles.top}>
-          <Text style={styles.wordmark}>Linker</Text>
-          <Text style={styles.tag}>Your links, always with you.</Text>
+          <Text style={[styles.wordmark, { fontSize: v(29), letterSpacing: v(-0.6) }]}>Linker</Text>
+          <Text style={[styles.tag, { marginTop: v(8), fontSize: v(13.5), lineHeight: v(20) }]}>
+            Your links, always with you.
+          </Text>
         </View>
         <View style={styles.buttons}>
           <OutlineButton
@@ -39,7 +43,7 @@ export function SignInScreen({ navigation }: Props) {
             title={busy ? 'Opening Google…' : 'Continue with Google'}
             onPress={handleGoogle}
           />
-          <View style={styles.gap} />
+          <View style={{ height: v(10) }} />
           <OutlineButton
             icon="apple"
             title="Continue with Apple"
@@ -47,16 +51,21 @@ export function SignInScreen({ navigation }: Props) {
               setError('Apple sign-in is not enabled in this build. Use Google or Email.')
             }
           />
-          <View style={styles.gap} />
+          <View style={{ height: v(10) }} />
           <OutlineButton
             icon="mail"
             title="Continue with Email"
             onPress={() => navigation.navigate('CreateAccount')}
           />
         </View>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={[styles.error, { fontSize: v(12) }]}>{error}</Text> : null}
       </View>
-      <Text style={styles.legal}>
+      <Text
+        style={[
+          styles.legal,
+          { fontSize: v(10.5), lineHeight: v(17), paddingHorizontal: v(20), paddingBottom: v(24) },
+        ]}
+      >
         By continuing, you agree to our{'\n'}Terms and Privacy Policy.
       </Text>
     </Screen>
@@ -64,19 +73,11 @@ export function SignInScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  content: { flex: 1, justifyContent: 'center', gap: 38, paddingHorizontal: 24 },
+  content: { flex: 1, justifyContent: 'center' },
   top: { alignItems: 'center' },
-  wordmark: { ...typography.wordmark, color: colors.textPrimary, textAlign: 'center' },
-  tag: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: 13.5, lineHeight: 20 },
+  wordmark: { fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
+  tag: { color: colors.textSecondary, textAlign: 'center' },
   buttons: {},
-  gap: { height: 10 },
-  error: { color: colors.pink, fontSize: 12, textAlign: 'center' },
-  legal: {
-    textAlign: 'center',
-    fontSize: 10.5,
-    color: colors.textTertiary,
-    lineHeight: 17,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-  },
+  error: { color: colors.pink, textAlign: 'center' },
+  legal: { textAlign: 'center', color: colors.textTertiary },
 });

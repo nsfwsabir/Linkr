@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../theme';
+import { useRefScale } from '../utils/useRefScale';
+import { colors } from '../theme';
 
 export function AppHeader({
   title,
@@ -9,9 +10,16 @@ export function AppHeader({
   title: string;
   right?: ReactNode;
 }) {
+  const v = useRefScale();
   return (
-    <View style={styles.row} accessibilityRole="header">
-      <Text style={styles.title}>{title}</Text>
+    <View
+      style={[
+        styles.row,
+        { paddingHorizontal: v(22), paddingTop: v(12), paddingBottom: v(14) },
+      ]}
+      accessibilityRole="header"
+    >
+      <Text style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3) }]}>{title}</Text>
       {right}
     </View>
   );
@@ -28,12 +36,14 @@ export function RoundIconButton({
   children: ReactNode;
   dark?: boolean;
 }) {
+  const v = useRefScale();
+  const d = v(33);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={[styles.round, dark && styles.roundDark]}
+      style={[styles.round, { width: d, height: d, borderRadius: d / 2 }, dark && styles.roundDark]}
       hitSlop={8}
     >
       {children}
@@ -42,22 +52,8 @@ export function RoundIconButton({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.pageHorizontal,
-    paddingTop: 12,
-    paddingBottom: 14,
-  },
-  title: { ...typography.screenTitle, color: colors.textPrimary },
-  round: {
-    width: spacing.roundButton,
-    height: spacing.roundButton,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.inputBg,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { fontWeight: '800', color: colors.textPrimary },
+  round: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.inputBg },
   roundDark: { backgroundColor: colors.dark },
 });

@@ -6,6 +6,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useRefScale } from '../utils/useRefScale';
 import { Icon, IconName } from './Icon';
 import { colors } from '../theme';
 
@@ -17,9 +18,15 @@ const TABS: { name: string; label: string; icon: IconName }[] = [
 ];
 
 export function BottomNav({ state, navigation }: BottomTabBarProps) {
+  const v = useRefScale();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(20, insets.bottom) }]}>
+    <View
+      style={[
+        styles.bar,
+        { paddingTop: v(10), paddingHorizontal: v(8), paddingBottom: Math.max(v(20), insets.bottom) },
+      ]}
+    >
       {TABS.map((t) => {
         const route = state.routes.find((r) => r.name === t.name);
         const index = route ? state.routes.indexOf(route) : -1;
@@ -34,10 +41,12 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
             onPress={() => {
               if (route) navigation.navigate(route.name);
             }}
-            style={styles.item}
+            style={[styles.item, { gap: v(4), minWidth: v(56) }]}
           >
-            <Icon name={t.icon} size={21} color={color} />
-            <Text style={[styles.label, active && styles.labelActive]}>{t.label}</Text>
+            <Icon name={t.icon} size={v(21)} color={color} />
+            <Text style={[styles.label, { fontSize: v(9.5) }, active && styles.labelActive]}>
+              {t.label}
+            </Text>
           </Pressable>
         );
       })}
@@ -49,13 +58,11 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingTop: 10,
-    paddingHorizontal: 8,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.screenBg,
   },
-  item: { alignItems: 'center', gap: 4, minWidth: 56 },
-  label: { fontSize: 9.5, fontWeight: '500', color: colors.textTertiary },
+  item: { alignItems: 'center' },
+  label: { fontWeight: '500', color: colors.textTertiary },
   labelActive: { color: colors.textPrimary, fontWeight: '700' },
 });

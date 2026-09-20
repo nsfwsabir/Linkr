@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, Pressable, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { useRefScale } from '../utils/useRefScale';
 import { Icon, IconName } from './Icon';
-import { colors, radii, spacing } from '../theme';
+import { colors } from '../theme';
 
 export function PrimaryButton({
   title,
@@ -16,15 +17,16 @@ export function PrimaryButton({
   style?: ViewStyle;
   accessibilityLabel?: string;
 }) {
+  const v = useRefScale();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
       onPress={onPress}
-      style={[styles.base, style]}
+      style={[styles.base, { gap: v(8), height: v(50), borderRadius: v(14), marginTop: v(6) }, style]}
     >
-      {icon ? <Icon name={icon} size={16} color="#fff" /> : null}
-      <Text style={styles.text}>{title}</Text>
+      {icon ? <Icon name={icon} size={v(16)} color="#fff" /> : null}
+      <Text style={[styles.text, { fontSize: v(14.5) }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -42,15 +44,16 @@ export function OutlineButton({
   style?: ViewStyle;
   textStyle?: TextStyle;
 }) {
+  const v = useRefScale();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
       onPress={onPress}
-      style={[styles.outline, style]}
+      style={[styles.outline, { gap: v(10), height: v(46), borderRadius: v(14) }, style]}
     >
-      {icon ? <Icon name={icon} size={18} color={colors.textPrimary} /> : null}
-      <Text style={[styles.outlineText, textStyle]}>{title}</Text>
+      {icon ? <Icon name={icon} size={v(18)} color={colors.textPrimary} /> : null}
+      <Text style={[styles.outlineText, { fontSize: v(13.5) }, textStyle]}>{title}</Text>
     </Pressable>
   );
 }
@@ -58,20 +61,13 @@ export function OutlineButton({
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
-    gap: 8,
-    height: spacing.primaryButtonHeight,
-    borderRadius: radii.input,
     backgroundColor: colors.dark,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 6,
   },
-  text: { color: '#fff', fontSize: 14.5, fontWeight: '700' },
+  text: { color: '#fff', fontWeight: '700' },
   outline: {
     flexDirection: 'row',
-    gap: 10,
-    height: 46,
-    borderRadius: radii.input,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: colors.border,
@@ -83,5 +79,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 1,
   },
-  outlineText: { fontSize: 13.5, fontWeight: '600', color: colors.textPrimary },
+  outlineText: { fontWeight: '600', color: colors.textPrimary },
 });

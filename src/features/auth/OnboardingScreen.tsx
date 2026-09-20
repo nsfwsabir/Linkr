@@ -1,25 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { Screen } from '../../components/Screen';
 import { Icon } from '../../components/Icon';
+import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
-
-/**
- * The HTML reference is a 248px-wide miniature — using its px values 1:1 as
- * dp makes everything proportionally tiny on a real phone. Scale the whole
- * onboarding composition by screen width so type and illustration match the
- * reference proportions on any device (capped for tablets).
- */
-function useRefScale() {
-  const { width } = useWindowDimensions();
-  const s = Math.min(width / 248, 2);
-  return (n: number) => Math.round(n * s);
-}
 
 function Tile({
   size,

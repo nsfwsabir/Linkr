@@ -7,11 +7,13 @@ import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateAccount'>;
 
 export function CreateAccountScreen({ navigation }: Props) {
+  const v = useRefScale();
   const { signUpWithEmail, signInWithEmail, signInMock, isConfigured } = useAuth();
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [name, setName] = useState('');
@@ -46,23 +48,29 @@ export function CreateAccountScreen({ navigation }: Props) {
     }
   };
 
+  const iconBtn = v(32);
   return (
     <Screen padded={false}>
-      <View style={styles.navHeader}>
+      <View
+        style={[
+          styles.navHeader,
+          { paddingTop: v(10), paddingHorizontal: v(22), paddingBottom: v(4) },
+        ]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
           onPress={() => navigation.goBack()}
-          style={styles.iconBtn}
+          style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
         >
-          <Icon name="arrowLeft" size={17} color={colors.textPrimary} />
+          <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
         </Pressable>
       </View>
-      <View style={styles.form}>
-        <Text style={styles.title}>
+      <View style={[styles.form, { paddingTop: v(14), paddingHorizontal: v(24) }]}>
+        <Text style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3), marginBottom: v(6) }]}>
           {mode === 'signup' ? 'Create your account' : 'Welcome back'}
         </Text>
-        <Text style={styles.sub}>
+        <Text style={[styles.sub, { fontSize: v(13.5), marginBottom: v(24) }]}>
           {mode === 'signup' ? 'Get started with Linker' : 'Sign in to Linker'}
         </Text>
         {mode === 'signup' ? (
@@ -89,7 +97,7 @@ export function CreateAccountScreen({ navigation }: Props) {
           }}
           secureTextEntry
         />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={[styles.error, { fontSize: v(12), marginBottom: v(8) }]}>{error}</Text> : null}
         <PrimaryButton
           title={busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
           onPress={handleSubmit}
@@ -102,7 +110,7 @@ export function CreateAccountScreen({ navigation }: Props) {
             setError(null);
           }}
         >
-          <Text style={styles.footer}>
+          <Text style={[styles.footer, { fontSize: v(12.5), marginTop: v(16) }]}>
             {mode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
             <Text style={styles.signin}>{mode === 'signup' ? 'Sign in' : 'Create one'}</Text>
           </Text>
@@ -113,19 +121,12 @@ export function CreateAccountScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  navHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    paddingHorizontal: 22,
-    paddingBottom: 4,
-  },
-  iconBtn: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  form: { paddingTop: 14, paddingHorizontal: 24, flex: 1 },
-  title: { fontSize: 23, fontWeight: '800', letterSpacing: -0.3, color: colors.textPrimary, marginBottom: 6 },
-  sub: { fontSize: 13.5, color: colors.textSecondary, marginBottom: 24 },
-  error: { color: colors.pink, fontSize: 12, marginBottom: 8 },
-  footer: { textAlign: 'center', fontSize: 12.5, color: colors.textTertiary, marginTop: 16 },
+  navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  iconBtn: { alignItems: 'center', justifyContent: 'center' },
+  form: { flex: 1 },
+  title: { fontWeight: '800', color: colors.textPrimary },
+  sub: { color: colors.textSecondary },
+  error: { color: colors.pink },
+  footer: { textAlign: 'center', color: colors.textTertiary },
   signin: { color: colors.textPrimary, fontWeight: '700' },
 });

@@ -5,9 +5,11 @@ import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { AppHeader } from '../../components/AppHeader';
 import { mockLinks } from '../../utils/mockData';
+import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 export function SearchScreen() {
+  const v = useRefScale();
   const [query, setQuery] = useState('');
 
   const results = useMemo(() => {
@@ -28,8 +30,10 @@ export function SearchScreen() {
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>No results found.</Text>}
+        contentContainerStyle={[styles.list, { paddingHorizontal: v(22) }]}
+        ListEmptyComponent={
+          <Text style={[styles.empty, { marginTop: v(32) }]}>No results found.</Text>
+        }
         renderItem={({ item }) => <LinkListItem link={item} />}
       />
     </SafeAreaView>
@@ -38,6 +42,6 @@ export function SearchScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.screenBg },
-  list: { paddingHorizontal: 22 },
-  empty: { color: colors.textTertiary, textAlign: 'center', marginTop: 32 },
+  list: {},
+  empty: { color: colors.textTertiary, textAlign: 'center' },
 });
