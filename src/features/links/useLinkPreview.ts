@@ -20,6 +20,10 @@ export function useLinkPreview(url: string) {
   });
 
   useEffect(() => {
+    if (!url) {
+      setStatus('unavailable');
+      return;
+    }
     if (cache.has(url)) return;
     if (!supabase) {
       setStatus('unavailable');
