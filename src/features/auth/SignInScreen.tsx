@@ -24,21 +24,24 @@ export function SignInScreen({ navigation }: Props) {
     const { error: err } = await signInWithGoogle();
     setBusy(false);
     if (err) setError(err);
-    // On success the auth-state listener flips the stack to Main.
   };
 
   return (
-    <Screen>
-      <View style={styles.center}>
-        <Text style={styles.wordmark}>Linker</Text>
-        <Text style={styles.tag}>Your links, always with you.</Text>
+    <Screen padded={false}>
+      <View style={styles.content}>
+        <View style={styles.top}>
+          <Text style={styles.wordmark}>Linker</Text>
+          <Text style={styles.tag}>Your links, always with you.</Text>
+        </View>
         <View style={styles.buttons}>
           <OutlineButton
+            icon="google"
             title={busy ? 'Opening Google…' : 'Continue with Google'}
             onPress={handleGoogle}
           />
           <View style={styles.gap} />
           <OutlineButton
+            icon="apple"
             title="Continue with Apple"
             onPress={() =>
               setError('Apple sign-in is not enabled in this build. Use Google or Email.')
@@ -46,6 +49,7 @@ export function SignInScreen({ navigation }: Props) {
           />
           <View style={styles.gap} />
           <OutlineButton
+            icon="mail"
             title="Continue with Email"
             onPress={() => navigation.navigate('CreateAccount')}
           />
@@ -60,17 +64,19 @@ export function SignInScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center' },
+  content: { flex: 1, justifyContent: 'center', gap: 38, paddingHorizontal: 24 },
+  top: { alignItems: 'center' },
   wordmark: { ...typography.wordmark, color: colors.textPrimary, textAlign: 'center' },
-  tag: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: 13.5 },
-  buttons: { marginTop: 38 },
+  tag: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: 13.5, lineHeight: 20 },
+  buttons: {},
   gap: { height: 10 },
-  error: { color: colors.pink, fontSize: 12, textAlign: 'center', marginTop: 12 },
+  error: { color: colors.pink, fontSize: 12, textAlign: 'center' },
   legal: {
     textAlign: 'center',
     fontSize: 10.5,
     color: colors.textTertiary,
     lineHeight: 17,
+    paddingHorizontal: 20,
     paddingBottom: 24,
   },
 });

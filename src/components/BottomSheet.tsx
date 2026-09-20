@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
+import { Icon } from './Icon';
 import { colors, radii } from '../theme';
 
 export function BottomSheet({
@@ -26,7 +27,7 @@ export function BottomSheet({
               onPress={onClose}
               style={styles.x}
             >
-              <Text style={styles.xText}>✕</Text>
+              <Icon name="close" size={13} color={colors.textSecondary} />
             </Pressable>
           </View>
           {children}

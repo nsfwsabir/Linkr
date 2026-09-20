@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../../app/navigation/RootNavigator';
 import { AppHeader, RoundIconButton } from '../../components/AppHeader';
+import { Icon } from '../../components/Icon';
 import { CollectionCard } from '../../components/ListItems';
 import { mockCollections } from '../../utils/mockData';
 import { colors } from '../../theme';
@@ -16,12 +18,12 @@ type Props = CompositeScreenProps<
 
 export function CollectionsScreen({ navigation }: Props) {
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <AppHeader
         title="Collections"
         right={
           <RoundIconButton label="Create collection">
-            <Text style={styles.plus}>+</Text>
+            <Icon name="plus" size={15} color="#fff" />
           </RoundIconButton>
         }
       />
@@ -36,12 +38,11 @@ export function CollectionsScreen({ navigation }: Props) {
           />
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.screenBg },
-  plus: { color: '#fff', fontSize: 18 },
   list: { paddingHorizontal: 20, paddingBottom: 16 },
 });

@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../../app/navigation/RootNavigator';
 import { AppHeader, RoundIconButton } from '../../components/AppHeader';
+import { Icon } from '../../components/Icon';
 import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { SaveLinkSheet } from '../links/SaveLinkSheet';
@@ -34,12 +36,12 @@ export function HomeScreen({ navigation }: Props) {
   }, [query, tab]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <AppHeader
         title="Linker"
         right={
           <RoundIconButton label="Save a link" onPress={() => setSheetVisible(true)}>
-            <Text style={styles.plus}>+</Text>
+            <Icon name="plus" size={15} color="#fff" />
           </RoundIconButton>
         }
       />
@@ -67,7 +69,7 @@ export function HomeScreen({ navigation }: Props) {
         )}
       />
       <SaveLinkSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -86,7 +88,6 @@ function tabToCollectionId(tab: string): string {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.screenBg },
-  plus: { color: '#fff', fontSize: 18, fontWeight: '600' },
   tabs: { flexDirection: 'row', gap: 4, marginHorizontal: 20, marginBottom: 10 },
   tab: {
     paddingVertical: 5,

@@ -26,6 +26,18 @@ export interface Link {
   saved_at: string;
   updated_at: string;
   collection_ids?: UUID[];
+  /** List-thumb artwork matching the HTML source (bg / gradient / letter / icon). */
+  thumb?: ThumbSpec;
+}
+
+export interface ThumbSpec {
+  bg?: string;
+  gradient?: [string, string];
+  label?: string;
+  labelColor?: string;
+  serif?: boolean;
+  icon?: 'heart';
+  iconColor?: string;
 }
 
 export interface LinkCollection {

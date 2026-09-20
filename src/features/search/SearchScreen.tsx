@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { AppHeader } from '../../components/AppHeader';
@@ -21,7 +22,7 @@ export function SearchScreen() {
   }, [query]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <AppHeader title="Search" />
       <SearchBar value={query} onChangeText={setQuery} />
       <FlatList
@@ -31,7 +32,7 @@ export function SearchScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No results found.</Text>}
         renderItem={({ item }) => <LinkListItem link={item} />}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

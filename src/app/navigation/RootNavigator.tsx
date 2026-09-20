@@ -3,8 +3,8 @@ import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
 import { useAuth } from '../providers/AuthProvider';
+import { BottomNav } from '../../components/BottomNav';
 import { SplashScreen } from '../../features/auth/SplashScreen';
 import { OnboardingScreen } from '../../features/auth/OnboardingScreen';
 import { SignInScreen } from '../../features/auth/SignInScreen';
@@ -36,19 +36,12 @@ export type MainTabParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  return <Text style={{ fontSize: 18 }}>{focused ? '●' : '○'}</Text>;
-}
-
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarLabelStyle: { fontSize: 9.5 },
-        // eslint-disable-next-line react/no-unstable-nested-components
-        tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
-      })}
+      screenOptions={{ headerShown: false }}
+      // eslint-disable-next-line react/no-unstable-nested-components
+      tabBar={(props) => <BottomNav {...props} />}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Collections" component={CollectionsScreen} />

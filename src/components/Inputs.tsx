@@ -1,10 +1,17 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { Icon, IconName } from './Icon';
 import { colors, radii, spacing } from '../theme';
 
-export function AppTextInput(props: TextInputProps) {
+const FIELD_ICON_COLOR = '#a7abb3';
+
+export function AppTextInput({
+  icon,
+  ...props
+}: TextInputProps & { icon?: IconName }) {
   return (
     <View style={styles.wrap}>
+      {icon ? <Icon name={icon} size={17} color={FIELD_ICON_COLOR} /> : null}
       <TextInput
         placeholderTextColor={colors.textTertiary}
         style={styles.input}
@@ -25,6 +32,7 @@ export function SearchBar({
 }) {
   return (
     <View style={styles.search}>
+      <Icon name="search" size={16} color={FIELD_ICON_COLOR} />
       <TextInput
         accessibilityRole="search"
         accessibilityLabel="Search your links"
@@ -40,22 +48,26 @@ export function SearchBar({
 
 const styles = StyleSheet.create({
   wrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     height: spacing.inputHeight,
     backgroundColor: colors.inputBg,
     borderRadius: radii.input,
     paddingHorizontal: 15,
-    justifyContent: 'center',
     marginBottom: 12,
   },
-  input: { fontSize: 13.5, color: colors.textPrimary },
+  input: { flex: 1, fontSize: 13.5, color: colors.textPrimary },
   search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
     height: spacing.searchHeight,
     backgroundColor: colors.inputBg,
     borderRadius: radii.search,
     marginHorizontal: spacing.pageHorizontal,
     marginBottom: 12,
     paddingHorizontal: 14,
-    justifyContent: 'center',
   },
-  searchInput: { fontSize: 13, color: colors.textPrimary },
+  searchInput: { flex: 1, fontSize: 13, color: colors.textPrimary },
 });
