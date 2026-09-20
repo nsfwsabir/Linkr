@@ -27,9 +27,14 @@ export function extractDomain(input: string): string {
   }
 }
 
-/** Site icon for a domain, served from the preview pipeline's icon provider. */
+/**
+ * Site icon for a domain. Uses Google's faviconV2 endpoint directly —
+ * the legacy s2 endpoint 301-redirects across hosts, which RN's image
+ * loader does not follow reliably (blank placeholders on device).
+ */
 export function faviconUrl(domain: string, size = 64): string {
   const d = domain.trim().toLowerCase().replace(/^www\./, '');
   if (!d) return '';
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=${size}`;
+  const url = encodeURIComponent(`https://${d}`);
+  return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=${size}`;
 }

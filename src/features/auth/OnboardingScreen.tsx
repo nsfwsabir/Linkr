@@ -47,7 +47,14 @@ function Tile({
         style,
       ]}
     >
-      {icon ? <Icon name={icon} size={dims.w * 0.42} color={iconColor ?? fg} /> : null}
+      {icon ? (
+        <Icon
+          name={icon}
+          // HTML gives lg/sm tiles a 42% icon; xs tiles use the default 18px icon.
+          size={size === 'xs' ? 18 : dims.w * 0.42}
+          color={iconColor ?? fg}
+        />
+      ) : null}
     </View>
   );
 }
@@ -96,7 +103,7 @@ function Page2() {
 function Page3() {
   return (
     <View style={styles.illustration}>
-      <View style={styles.centerBox}>
+      <View style={styles.artBox}>
         <View style={styles.mockBack} />
         <View style={styles.mockFront}>
           <LinearGradient
@@ -151,14 +158,16 @@ export function OnboardingScreen({ navigation }: Props) {
           <Text style={styles.title}>{page.title}</Text>
           <Text style={styles.desc}>{page.desc}</Text>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={last ? 'Get started' : 'Next onboarding step'}
-          onPress={() => (last ? navigation.replace('SignIn') : setIndex(index + 1))}
-          style={styles.next}
-        >
-          <Icon name="arrowRight" size={19} color={colors.textPrimary} />
-        </Pressable>
+        <View style={styles.nextWrap}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={last ? 'Get started' : 'Next onboarding step'}
+            onPress={() => (last ? navigation.replace('SignIn') : setIndex(index + 1))}
+            style={styles.next}
+          >
+            <Icon name="arrowRight" size={19} color={colors.textPrimary} />
+          </Pressable>
+        </View>
       </View>
     </Screen>
   );
@@ -167,7 +176,9 @@ export function OnboardingScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   inner: { flex: 1 },
   illustration: { position: 'relative', height: 140, marginTop: 36, marginHorizontal: 24 },
-  centerBox: { flex: 1, alignItems: 'center' },
+  // Fixed 200px composition box (= 248px reference phone minus 24px margins),
+  // so absolute offsets match the HTML source exactly on any screen width.
+  artBox: { width: 200, alignSelf: 'center', height: '100%' },
   tile: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -182,6 +193,7 @@ const styles = StyleSheet.create({
     width: 148,
     height: 104,
     top: 6,
+    left: 72,
     borderRadius: 18,
     backgroundColor: '#e3e6eb',
   },
@@ -190,6 +202,7 @@ const styles = StyleSheet.create({
     width: 172,
     height: 120,
     top: 32,
+    left: 14,
     borderRadius: 18,
     backgroundColor: '#fff',
     padding: 13,
@@ -222,10 +235,13 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   desc: { fontSize: 13, color: colors.textSecondary, lineHeight: 21 },
+  nextWrap: {
+    alignItems: 'flex-end',
+    paddingRight: 24,
+    marginTop: 88,
+    paddingBottom: 28,
+  },
   next: {
-    position: 'absolute',
-    right: 24,
-    bottom: 28,
     width: 44,
     height: 44,
     borderRadius: 22,
