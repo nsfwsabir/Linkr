@@ -5,18 +5,39 @@ const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 /**
- * Supabase client for Expo. Auth session is persisted via SecureStore.
+ * Storage adapter: SecureStore on native, in-memory fallback (web / unavailable).
  * Never bundle the service-role key — privileged work lives in Edge Functions.
  */
+const memory = new Map<string, string>();
+const authStorage = {
+  getItem: async (key: string) => {
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch {
+      return memory.get(key) ?? null;
+    }
+  },
+  setItem: async (key: string, value: string) => {
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch {
+      memory.set(key, value);
+    }
+  },
+  removeItem: async (key: string) => {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch {
+      memory.delete(key);
+    }
+  },
+};
+
 export const supabase =
   url && anonKey
     ? createClient(url, anonKey, {
         auth: {
-          storage: {
-            getItem: (key) => SecureStore.getItemAsync(key),
-            setItem: (key, value) => SecureStore.setItemAsync(key, value),
-            removeItem: (key) => SecureStore.deleteItemAsync(key),
-          },
+          storage: authStorage,
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: false,

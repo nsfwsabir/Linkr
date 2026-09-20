@@ -13,15 +13,19 @@ const ROWS = [
 ];
 
 export function ProfileScreen() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const displayName =
+    (user as { user_metadata?: { display_name?: string } })?.user_metadata?.display_name ??
+    mockUser.name;
+  const email = (user as { email?: string })?.email ?? mockUser.email;
   return (
     <View style={styles.container}>
       <AppHeader title="Profile" />
       <View style={styles.profileRow}>
         <View style={styles.avatar} accessibilityRole="image" accessibilityLabel="Profile avatar" />
         <View>
-          <Text style={styles.name}>{mockUser.name}</Text>
-          <Text style={styles.email}>{mockUser.email}</Text>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.email}>{email}</Text>
         </View>
       </View>
       <View style={styles.menu}>
@@ -37,7 +41,7 @@ export function ProfileScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Sign out"
-        onPress={signOut}
+        onPress={() => void signOut()}
         style={styles.signout}
       >
         <Text style={styles.signoutText}>Sign Out</Text>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -58,7 +59,11 @@ function MainTabs() {
 }
 
 export function RootNavigator() {
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
+  if (loading) {
+    // Hold splash while restoring the Supabase session — avoids stack flash.
+    return <View style={{ flex: 1, backgroundColor: '#eef1f5' }} />;
+  }
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
