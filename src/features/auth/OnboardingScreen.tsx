@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
@@ -9,10 +9,21 @@ import { colors } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
+/**
+ * The HTML reference is a 248px-wide miniature — using its px values 1:1 as
+ * dp makes everything proportionally tiny on a real phone. Scale the whole
+ * onboarding composition by screen width so type and illustration match the
+ * reference proportions on any device (capped for tablets).
+ */
+function useRefScale() {
+  const { width } = useWindowDimensions();
+  const s = Math.min(width / 248, 2);
+  return (n: number) => Math.round(n * s);
+}
+
 function Tile({
   size,
   kind,
-  radius,
   circle,
   style,
   icon,
@@ -20,30 +31,22 @@ function Tile({
 }: {
   size: 'lg' | 'sm' | 'xs';
   kind: 'blue' | 'orange' | 'white';
-  radius?: number;
   circle?: boolean;
   style?: object;
   icon?: 'link2' | 'image' | 'search' | 'folder';
   iconColor?: string;
 }) {
-  const dims =
-    size === 'lg'
-      ? { w: 80, h: 80, r: 25 }
-      : size === 'sm'
-        ? { w: 52, h: 52, r: 17 }
-        : { w: 32, h: 32, r: 11 };
+  const v = useRefScale();
+  const base =
+    size === 'lg' ? { w: 80, h: 80, r: 25 } : size === 'sm' ? { w: 52, h: 52, r: 17 } : { w: 32, h: 32, r: 11 };
+  const w = v(base.w);
   const bg = kind === 'blue' ? '#2f6fed' : kind === 'orange' ? '#f5a623' : '#fff';
   const fg = kind === 'white' ? '#50545c' : '#fff';
   return (
     <View
       style={[
         styles.tile,
-        {
-          width: dims.w,
-          height: dims.h,
-          borderRadius: circle ? dims.w / 2 : (radius ?? dims.r),
-          backgroundColor: bg,
-        },
+        { width: w, height: v(base.h), borderRadius: circle ? w / 2 : v(base.r), backgroundColor: bg },
         style,
       ]}
     >
@@ -51,7 +54,7 @@ function Tile({
         <Icon
           name={icon}
           // HTML gives lg/sm tiles a 42% icon; xs tiles use the default 18px icon.
-          size={size === 'xs' ? 18 : dims.w * 0.42}
+          size={size === 'xs' ? v(18) : Math.round(w * 0.42)}
           color={iconColor ?? fg}
         />
       ) : null}
@@ -60,66 +63,74 @@ function Tile({
 }
 
 function Page1() {
+  const v = useRefScale();
   return (
-    <View style={styles.illustration}>
-      <Tile size="sm" kind="white" style={{ position: 'absolute', top: 0, right: 30 }} icon="image" />
-      <Tile
-        size="xs"
-        kind="orange"
-        circle
-        style={{ position: 'absolute', bottom: 4, right: 2 }}
-      />
-      <Tile
-        size="lg"
-        kind="blue"
-        style={{ position: 'absolute', top: 26, left: 6 }}
-        icon="link2"
-      />
+    <View style={[styles.illustration, { height: v(140), marginTop: v(36) }]}>
+      <Tile size="sm" kind="white" style={{ position: 'absolute', top: 0, right: v(30) }} icon="image" />
+      <Tile size="xs" kind="orange" circle style={{ position: 'absolute', bottom: v(4), right: v(2) }} />
+      <Tile size="lg" kind="blue" style={{ position: 'absolute', top: v(26), left: v(6) }} icon="link2" />
     </View>
   );
 }
 
 function Page2() {
+  const v = useRefScale();
   return (
-    <View style={styles.illustration}>
-      <Tile size="sm" kind="white" style={{ position: 'absolute', top: 0, right: 22 }} icon="search" />
+    <View style={[styles.illustration, { height: v(140), marginTop: v(36) }]}>
+      <Tile size="sm" kind="white" style={{ position: 'absolute', top: 0, right: v(22) }} icon="search" />
       <Tile
         size="xs"
         kind="orange"
-        style={{ position: 'absolute', bottom: 8, left: 4 }}
+        style={{ position: 'absolute', bottom: v(8), left: v(4) }}
         icon="folder"
         iconColor="#fff"
       />
-      <Tile
-        size="lg"
-        kind="blue"
-        style={{ position: 'absolute', top: 28, left: 32 }}
-        icon="folder"
-      />
+      <Tile size="lg" kind="blue" style={{ position: 'absolute', top: v(28), left: v(32) }} icon="folder" />
     </View>
   );
 }
 
 function Page3() {
+  const v = useRefScale();
   return (
-    <View style={styles.illustration}>
-      <View style={styles.artBox}>
-        <View style={styles.mockBack} />
-        <View style={styles.mockFront}>
+    <View style={[styles.illustration, { height: v(140), marginTop: v(36) }]}>
+      <View style={{ width: v(200), alignSelf: 'center', height: '100%' }}>
+        <View
+          style={[styles.mockBack, { width: v(148), height: v(104), top: v(6), left: v(72), borderRadius: v(18) }]}
+        />
+        <View
+          style={[
+            styles.mockFront,
+            {
+              width: v(172),
+              height: v(120),
+              top: v(32),
+              left: v(14),
+              borderRadius: v(18),
+              padding: v(13),
+              gap: v(9),
+            },
+          ]}
+        >
           <LinearGradient
             colors={['#dbe6fb', '#eef1f5']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.mockThumb}
+            style={[styles.mockThumb, { height: v(26), borderRadius: v(8) }]}
           />
-          <View style={styles.mockRow}>
-            <View style={styles.mockHeart}>
-              <Icon name="heart" size={11} color={colors.pink} />
+          <View style={[styles.mockRow, { gap: v(7) }]}>
+            <View
+              style={[
+                styles.mockHeart,
+                { width: v(20), height: v(20), borderRadius: v(7) },
+              ]}
+            >
+              <Icon name="heart" size={v(11)} color={colors.pink} />
             </View>
-            <Text style={styles.mockRowText}>Read Later</Text>
+            <Text style={[styles.mockRowText, { fontSize: v(11.5) }]}>Read Later</Text>
           </View>
-          <View style={styles.mockLine} />
-          <View style={[styles.mockLine, { width: '70%' }]} />
+          <View style={[styles.mockLine, { height: v(6), borderRadius: v(3) }]} />
+          <View style={[styles.mockLine, { height: v(6), borderRadius: v(3), width: '70%' }]} />
         </View>
       </View>
     </View>
@@ -146,26 +157,32 @@ const PAGES = [
 ];
 
 export function OnboardingScreen({ navigation }: Props) {
+  const v = useRefScale();
   const [index, setIndex] = useState(0);
   const page = PAGES[index];
   const last = index === PAGES.length - 1;
+  const btn = v(44);
 
   return (
     <Screen padded={false}>
       <View style={styles.inner}>
         {page.art}
-        <View style={styles.body}>
-          <Text style={styles.title}>{page.title}</Text>
-          <Text style={styles.desc}>{page.desc}</Text>
+        <View style={[styles.body, { paddingTop: v(22), paddingHorizontal: v(24) }]}>
+          <Text
+            style={[styles.title, { fontSize: v(21), lineHeight: v(27), marginBottom: v(9) }]}
+          >
+            {page.title}
+          </Text>
+          <Text style={[styles.desc, { fontSize: v(13), lineHeight: v(21) }]}>{page.desc}</Text>
         </View>
-        <View style={styles.nextWrap}>
+        <View style={[styles.nextWrap, { paddingRight: v(24), marginTop: v(88), paddingBottom: v(28) }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={last ? 'Get started' : 'Next onboarding step'}
             onPress={() => (last ? navigation.replace('SignIn') : setIndex(index + 1))}
-            style={styles.next}
+            style={[styles.next, { width: btn, height: btn, borderRadius: btn / 2 }]}
           >
-            <Icon name="arrowRight" size={19} color={colors.textPrimary} />
+            <Icon name="arrowRight" size={v(19)} color={colors.textPrimary} />
           </Pressable>
         </View>
       </View>
@@ -175,10 +192,7 @@ export function OnboardingScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   inner: { flex: 1 },
-  illustration: { position: 'relative', height: 140, marginTop: 36, marginHorizontal: 24 },
-  // Fixed 200px composition box (= 248px reference phone minus 24px margins),
-  // so absolute offsets match the HTML source exactly on any screen width.
-  artBox: { width: 200, alignSelf: 'center', height: '100%' },
+  illustration: { position: 'relative', marginHorizontal: 24 },
   tile: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -188,63 +202,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 14 },
     elevation: 6,
   },
-  mockBack: {
-    position: 'absolute',
-    width: 148,
-    height: 104,
-    top: 6,
-    left: 72,
-    borderRadius: 18,
-    backgroundColor: '#e3e6eb',
-  },
+  mockBack: { position: 'absolute', backgroundColor: '#e3e6eb' },
   mockFront: {
     position: 'absolute',
-    width: 172,
-    height: 120,
-    top: 32,
-    left: 14,
-    borderRadius: 18,
     backgroundColor: '#fff',
-    padding: 13,
-    gap: 9,
     shadowColor: '#14161e',
     shadowOpacity: 0.12,
     shadowRadius: 26,
     shadowOffset: { width: 0, height: 14 },
     elevation: 6,
   },
-  mockThumb: { height: 26, borderRadius: 8 },
-  mockRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  mockHeart: {
-    width: 20,
-    height: 20,
-    borderRadius: 7,
-    backgroundColor: colors.pinkBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mockRowText: { fontSize: 11.5, fontWeight: '700', color: colors.textPrimary },
-  mockLine: { height: 6, borderRadius: 3, backgroundColor: '#eef0f3' },
-  body: { paddingTop: 22, paddingHorizontal: 24 },
-  title: {
-    fontSize: 21,
-    fontWeight: '800',
-    lineHeight: 27,
-    marginBottom: 9,
-    letterSpacing: -0.3,
-    color: colors.textPrimary,
-  },
-  desc: { fontSize: 13, color: colors.textSecondary, lineHeight: 21 },
-  nextWrap: {
-    alignItems: 'flex-end',
-    paddingRight: 24,
-    marginTop: 88,
-    paddingBottom: 28,
-  },
+  mockThumb: {},
+  mockRow: { flexDirection: 'row', alignItems: 'center' },
+  mockHeart: { backgroundColor: colors.pinkBg, alignItems: 'center', justifyContent: 'center' },
+  mockRowText: { fontWeight: '700', color: colors.textPrimary },
+  mockLine: { backgroundColor: '#eef0f3' },
+  body: {},
+  title: { fontWeight: '800', letterSpacing: -0.3, color: colors.textPrimary },
+  desc: { color: colors.textSecondary },
+  nextWrap: { alignItems: 'flex-end' },
   next: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
