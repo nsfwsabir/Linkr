@@ -7,6 +7,7 @@ import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { mockUser } from '../../utils/mockData';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
@@ -16,6 +17,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'EditProfile'>;
 export function EditProfileScreen({ navigation }: Props) {
   const v = useRefScale();
   const { user, updateProfile } = useAuth();
+  const { c } = useTheme();
   const initialName =
     (user as { user_metadata?: { display_name?: string } })?.user_metadata?.display_name ??
     (user as { name?: string })?.name ??
@@ -59,19 +61,27 @@ export function EditProfileScreen({ navigation }: Props) {
           onPress={() => navigation.goBack()}
           style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
         >
-          <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
+          <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
         </Pressable>
       </View>
       <View style={[styles.form, { paddingTop: v(8), paddingHorizontal: v(24) }]}>
-        <Text style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3), marginBottom: v(6) }]}>
+        <Text
+          style={[
+            styles.title,
+            { fontSize: v(23), letterSpacing: v(-0.3), marginBottom: v(6), color: c.textPrimary },
+          ]}
+        >
           Edit Profile
         </Text>
-        <Text style={[styles.sub, { fontSize: v(13.5), marginBottom: v(24) }]}>
+        <Text style={[styles.sub, { fontSize: v(13.5), marginBottom: v(24), color: c.textSecondary }]}>
           Update your name and email
         </Text>
         <View style={styles.avatarWrap}>
           <View
-            style={[styles.avatar, { width: avatar, height: avatar, borderRadius: avatar / 2 }]}
+            style={[
+              styles.avatar,
+              { backgroundColor: c.avatarBg, width: avatar, height: avatar, borderRadius: avatar / 2 },
+            ]}
             accessibilityRole="image"
             accessibilityLabel="Profile avatar"
           >
@@ -117,9 +127,9 @@ const styles = StyleSheet.create({
   navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBtn: { alignItems: 'center', justifyContent: 'center' },
   form: { flex: 1 },
-  title: { fontWeight: '800', color: colors.textPrimary },
-  sub: { color: colors.textSecondary },
+  title: { fontWeight: '800' },
+  sub: {},
   avatarWrap: { alignItems: 'center', marginBottom: 24 },
-  avatar: { backgroundColor: '#dfe2e8', alignItems: 'center', justifyContent: 'center' },
+  avatar: { alignItems: 'center', justifyContent: 'center' },
   error: { color: colors.pink },
 });

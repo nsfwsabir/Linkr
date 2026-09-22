@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { Screen } from '../../components/Screen';
 import { Icon } from '../../components/Icon';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
@@ -81,11 +82,15 @@ function Page2() {
 
 function Page3() {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <View style={[styles.illustration, { height: v(140), marginTop: v(36) }]}>
       <View style={{ width: v(200), alignSelf: 'center', height: '100%' }}>
         <View
-          style={[styles.mockBack, { width: v(148), height: v(104), top: v(6), left: v(72), borderRadius: v(18) }]}
+          style={[
+            styles.mockBack,
+            { width: v(148), height: v(104), top: v(6), left: v(72), borderRadius: v(18), backgroundColor: c.screenBgAlt },
+          ]}
         />
         <View
           style={[
@@ -98,6 +103,7 @@ function Page3() {
               borderRadius: v(18),
               padding: v(13),
               gap: v(9),
+              backgroundColor: c.cardBg,
             },
           ]}
         >
@@ -111,15 +117,19 @@ function Page3() {
             <View
               style={[
                 styles.mockHeart,
-                { width: v(20), height: v(20), borderRadius: v(7) },
+                { width: v(20), height: v(20), borderRadius: v(7), backgroundColor: c.pinkBg },
               ]}
             >
               <Icon name="heart" size={v(11)} color={colors.pink} />
             </View>
-            <Text style={[styles.mockRowText, { fontSize: v(11.5) }]}>Read Later</Text>
+            <Text style={[styles.mockRowText, { fontSize: v(11.5), color: c.textPrimary }]}>
+              Read Later
+            </Text>
           </View>
-          <View style={[styles.mockLine, { height: v(6), borderRadius: v(3) }]} />
-          <View style={[styles.mockLine, { height: v(6), borderRadius: v(3), width: '70%' }]} />
+          <View style={[styles.mockLine, { height: v(6), borderRadius: v(3), backgroundColor: c.border }]} />
+          <View
+            style={[styles.mockLine, { height: v(6), borderRadius: v(3), width: '70%', backgroundColor: c.border }]}
+          />
         </View>
       </View>
     </View>
@@ -147,6 +157,7 @@ const PAGES = [
 
 export function OnboardingScreen({ navigation }: Props) {
   const v = useRefScale();
+  const { c } = useTheme();
   const [index, setIndex] = useState(0);
   const page = PAGES[index];
   const last = index === PAGES.length - 1;
@@ -158,20 +169,33 @@ export function OnboardingScreen({ navigation }: Props) {
         {page.art}
         <View style={[styles.body, { paddingTop: v(22), paddingHorizontal: v(24) }]}>
           <Text
-            style={[styles.title, { fontSize: v(21), lineHeight: v(27), marginBottom: v(9) }]}
+            style={[
+              styles.title,
+              { fontSize: v(21), lineHeight: v(27), marginBottom: v(9), color: c.textPrimary },
+            ]}
           >
             {page.title}
           </Text>
-          <Text style={[styles.desc, { fontSize: v(13), lineHeight: v(21) }]}>{page.desc}</Text>
+          <Text style={[styles.desc, { fontSize: v(13), lineHeight: v(21), color: c.textSecondary }]}>
+            {page.desc}
+          </Text>
         </View>
         <View style={[styles.nextWrap, { paddingRight: v(24), marginTop: v(88), paddingBottom: v(28) }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={last ? 'Get started' : 'Next onboarding step'}
             onPress={() => (last ? navigation.replace('SignIn') : setIndex(index + 1))}
-            style={[styles.next, { width: btn, height: btn, borderRadius: btn / 2 }]}
+            style={[
+              styles.next,
+              {
+                width: btn,
+                height: btn,
+                borderRadius: btn / 2,
+                backgroundColor: c.cardBg,
+              },
+            ]}
           >
-            <Icon name="arrowRight" size={v(19)} color={colors.textPrimary} />
+            <Icon name="arrowRight" size={v(19)} color={c.textPrimary} />
           </Pressable>
         </View>
       </View>
@@ -191,10 +215,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 14 },
     elevation: 6,
   },
-  mockBack: { position: 'absolute', backgroundColor: '#e3e6eb' },
+  mockBack: { position: 'absolute' },
   mockFront: {
     position: 'absolute',
-    backgroundColor: '#fff',
     shadowColor: '#14161e',
     shadowOpacity: 0.12,
     shadowRadius: 26,
@@ -203,15 +226,14 @@ const styles = StyleSheet.create({
   },
   mockThumb: {},
   mockRow: { flexDirection: 'row', alignItems: 'center' },
-  mockHeart: { backgroundColor: colors.pinkBg, alignItems: 'center', justifyContent: 'center' },
-  mockRowText: { fontWeight: '700', color: colors.textPrimary },
-  mockLine: { backgroundColor: '#eef0f3' },
+  mockHeart: { alignItems: 'center', justifyContent: 'center' },
+  mockRowText: { fontWeight: '700' },
+  mockLine: {},
   body: {},
-  title: { fontWeight: '800', letterSpacing: -0.3, color: colors.textPrimary },
-  desc: { color: colors.textSecondary },
+  title: { fontWeight: '800', letterSpacing: -0.3 },
+  desc: {},
   nextWrap: { alignItems: 'flex-end' },
   next: {
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#14161e',

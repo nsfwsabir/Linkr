@@ -3,7 +3,7 @@ import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRefScale } from '../utils/useRefScale';
 import { Icon } from './Icon';
-import { colors } from '../theme';
+import { useTheme } from '../app/providers/ThemeProvider';
 
 export function BottomSheet({
   visible,
@@ -18,15 +18,17 @@ export function BottomSheet({
 }) {
   const v = useRefScale();
   const insets = useSafeAreaInsets();
+  const { c } = useTheme();
   const x = v(26);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.dim}>
+      <View style={[styles.dim, { backgroundColor: c.overlay }]}>
         <Pressable style={styles.dimPress} onPress={onClose} accessibilityLabel="Close" />
         <View
           style={[
             styles.sheet,
             {
+              backgroundColor: c.cardBg,
               borderTopLeftRadius: v(28),
               borderTopRightRadius: v(28),
               padding: v(20),
@@ -35,14 +37,16 @@ export function BottomSheet({
           ]}
         >
           <View style={[styles.header, { marginBottom: v(16) }]}>
-            <Text style={[styles.title, { fontSize: v(16.5) }]}>{title}</Text>
+            <Text style={[styles.title, { fontSize: v(16.5), color: c.textPrimary }]}>
+              {title}
+            </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Close dialog"
               onPress={onClose}
-              style={[styles.x, { width: x, height: x, borderRadius: x / 2 }]}
+              style={[styles.x, { width: x, height: x, borderRadius: x / 2, backgroundColor: c.inputBg }]}
             >
-              <Icon name="close" size={v(13)} color={colors.textSecondary} />
+              <Icon name="close" size={v(13)} color={c.textSecondary} />
             </Pressable>
           </View>
           {children}
@@ -53,10 +57,10 @@ export function BottomSheet({
 }
 
 const styles = StyleSheet.create({
-  dim: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' },
+  dim: { flex: 1, justifyContent: 'flex-end' },
   dimPress: { flex: 1 },
-  sheet: { backgroundColor: '#fff' },
+  sheet: {},
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontWeight: '800', color: colors.textPrimary },
-  x: { backgroundColor: colors.inputBg, alignItems: 'center', justifyContent: 'center' },
+  title: { fontWeight: '800' },
+  x: { alignItems: 'center', justifyContent: 'center' },
 });

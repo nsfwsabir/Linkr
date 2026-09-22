@@ -3,11 +3,13 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRefScale } from '../utils/useRefScale';
 import { Icon, CollectionIcon } from './Icon';
-import { colors, collectionThemes } from '../theme';
+import { themesFor } from '../theme';
+import { useTheme } from '../app/providers/ThemeProvider';
 import type { Collection, Link, ThumbSpec } from '../types';
 
 function Thumb({ spec }: { spec?: ThumbSpec }) {
   const v = useRefScale();
+  const { c } = useTheme();
   const d = v(42);
   const inner = spec?.icon ? (
     <Icon name={spec.icon} size={v(18)} color={spec.iconColor ?? '#fff'} />
@@ -37,7 +39,9 @@ function Thumb({ spec }: { spec?: ThumbSpec }) {
     );
   }
   return (
-    <View style={[styles.thumb, box, spec?.bg ? { backgroundColor: spec.bg } : null]}>
+    <View
+      style={[styles.thumb, box, { backgroundColor: spec?.bg ?? c.screenBgAlt }]}
+    >
       {inner}
     </View>
   );
@@ -53,6 +57,7 @@ export function LinkListItem({
   showDots?: boolean;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -62,20 +67,22 @@ export function LinkListItem({
     >
       <Thumb spec={link.thumb} />
       <View style={styles.textWrap}>
-        <Text numberOfLines={1} style={[styles.title, { fontSize: v(12.8) }]}>
+        <Text numberOfLines={1} style={[styles.title, { fontSize: v(12.8), color: c.textPrimary }]}>
           {link.title}
         </Text>
-        <Text numberOfLines={1} style={[styles.meta, { fontSize: v(11), marginTop: v(2) }]}>
+        <Text numberOfLines={1} style={[styles.meta, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
           {link.source_domain}
           {showDots ? ` · ${link.saved_at}` : ''}
         </Text>
       </View>
       {showDots ? (
         <View style={[styles.dots, { marginLeft: v(4) }]}>
-          <Icon name="dots" size={v(16)} color={colors.textTertiary} />
+          <Icon name="dots" size={v(16)} color={c.textTertiary} />
         </View>
       ) : (
-        <Text style={[styles.time, { fontSize: v(10.5), marginLeft: v(4) }]}>{link.saved_at}</Text>
+        <Text style={[styles.time, { fontSize: v(10.5), marginLeft: v(4), color: c.textTertiary }]}>
+          {link.saved_at}
+        </Text>
       )}
     </Pressable>
   );
@@ -91,7 +98,8 @@ export function CollectionCard({
   onPress?: () => void;
 }) {
   const v = useRefScale();
-  const theme = collectionThemes[collection.color_key];
+  const { c } = useTheme();
+  const theme = themesFor(c)[collection.color_key];
   const box = iconSize === 38 ? v(38) : v(44);
   return (
     <Pressable
@@ -100,7 +108,14 @@ export function CollectionCard({
       onPress={onPress}
       style={[
         styles.card,
-        { gap: v(12), borderRadius: v(17), padding: v(10), paddingHorizontal: v(13), marginBottom: v(8) },
+        {
+          gap: v(12),
+          borderRadius: v(17),
+          padding: v(10),
+          paddingHorizontal: v(13),
+          marginBottom: v(8),
+          backgroundColor: c.cardBg,
+        },
       ]}
     >
       <View
@@ -116,12 +131,12 @@ export function CollectionCard({
         />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.name, { fontSize: v(13.5) }]}>{collection.name}</Text>
-        <Text style={[styles.count, { fontSize: v(11), marginTop: v(2) }]}>
+        <Text style={[styles.name, { fontSize: v(13.5), color: c.textPrimary }]}>{collection.name}</Text>
+        <Text style={[styles.count, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
           {collection.link_count ?? 0} links
         </Text>
       </View>
-      <Icon name="chevronRight" size={v(16)} color={colors.textTertiary} />
+      <Icon name="chevronRight" size={v(16)} color={c.textTertiary} />
     </Pressable>
   );
 }
@@ -129,21 +144,19 @@ export function CollectionCard({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   thumb: {
-    backgroundColor: colors.screenBgAlt,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   thumbText: { fontWeight: '800' },
   textWrap: { flex: 1, minWidth: 0 },
-  title: { fontWeight: '700', color: colors.textPrimary },
-  meta: { color: colors.textTertiary },
-  time: { color: colors.textTertiary },
+  title: { fontWeight: '700' },
+  meta: {},
+  time: {},
   dots: {},
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     shadowColor: '#14161e',
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -151,6 +164,6 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   icon: { alignItems: 'center', justifyContent: 'center' },
-  name: { fontWeight: '700', color: colors.textPrimary },
-  count: { color: colors.textTertiary },
+  name: { fontWeight: '700' },
+  count: {},
 });

@@ -11,6 +11,7 @@ import { BottomSheet } from '../../components/BottomSheet';
 import { useLinkPreview } from './useLinkPreview';
 import { faviconUrl } from '../../utils/url';
 import { useLinks } from '../../app/providers/LinksProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
@@ -19,6 +20,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
 export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collectionLinks, deleteLink } = useLinks();
+  const { c } = useTheme();
   const link =
     links.find((l) => l.id === route.params.linkId) ??
     collectionLinks.find((l) => l.id === route.params.linkId) ??
@@ -52,7 +54,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <LinearGradient
         colors={['#0a1420', '#152a44', '#3a6288', '#6f97b8']}
         locations={[0, 0.38, 0.75, 1]}
@@ -82,6 +84,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             accessibilityLabel="Go back"
             onPress={() => navigation.goBack()}
           >
+            {/* FAB stays white in both themes; icon uses static light-theme ink. */}
             <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
           </Pressable>
           <Pressable
@@ -95,14 +98,19 @@ export function LinkDetailScreen({ route, navigation }: Props) {
         </View>
       </LinearGradient>
       <View style={[styles.body, { paddingTop: v(18), paddingHorizontal: v(22) }]}>
-        <Text style={[styles.title, { fontSize: v(19), lineHeight: v(24), letterSpacing: v(-0.2) }]}>
+        <Text
+          style={[
+            styles.title,
+            { fontSize: v(19), lineHeight: v(24), letterSpacing: v(-0.2), color: c.textPrimary },
+          ]}
+        >
           {link.title}
         </Text>
         <View style={[styles.source, { gap: v(7), marginVertical: v(9) }]}>
           {iconUri ? (
             <Image
               source={{ uri: iconUri }}
-              style={[styles.favicon, { width: v(16), height: v(16), borderRadius: v(4) }]}
+              style={[styles.favicon, { width: v(16), height: v(16), borderRadius: v(4), backgroundColor: c.screenBgAlt }]}
               onError={() => setFaviconFailed(true)}
               accessibilityRole="image"
               accessibilityLabel={`${link.source_domain} icon`}
@@ -115,26 +123,45 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               style={[styles.sourceDot, { width: v(15), height: v(15), borderRadius: v(5) }]}
             />
           )}
-          <Text style={[styles.sourceText, { fontSize: v(11.5) }]}>{link.source_domain}</Text>
+          <Text style={[styles.sourceText, { fontSize: v(11.5), color: c.textTertiary }]}>
+            {link.source_domain}
+          </Text>
         </View>
         {description ? (
-          <Text style={[styles.desc, { fontSize: v(12.5), lineHeight: v(19), marginBottom: v(12) }]}>
+          <Text
+            style={[
+              styles.desc,
+              { fontSize: v(12.5), lineHeight: v(19), marginBottom: v(12), color: c.textSecondary },
+            ]}
+          >
             {description}
           </Text>
         ) : null}
         <PrimaryButton title="Open Link" icon="external" onPress={openLink} />
-        <View style={[styles.row, { paddingVertical: v(11), marginTop: v(4) }]}>
-          <Text style={[styles.rowText, { fontSize: v(12.8) }]}>Add to collection</Text>
-          <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
+        <View
+          style={[
+            styles.row,
+            { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
+          ]}
+        >
+          <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>
+            Add to collection
+          </Text>
+          <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
         </View>
-        <View style={[styles.row, { paddingVertical: v(11), marginTop: v(4) }]}>
+        <View
+          style={[
+            styles.row,
+            { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
+          ]}
+        >
           <View>
-            <Text style={[styles.rowText, { fontSize: v(12.8) }]}>Saved</Text>
-            <Text style={[styles.sub, { fontSize: v(11), marginTop: v(2) }]}>
+            <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>Saved</Text>
+            <Text style={[styles.sub, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
               {link.saved_at} · {collection.name}
             </Text>
           </View>
-          <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
+          <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
         </View>
       </View>
 
@@ -145,7 +172,12 @@ export function LinkDetailScreen({ route, navigation }: Props) {
       >
         {confirming ? (
           <View>
-            <Text style={[styles.confirmText, { fontSize: v(13), lineHeight: v(20), marginBottom: v(16) }]}>
+            <Text
+              style={[
+                styles.confirmText,
+                { fontSize: v(13), lineHeight: v(20), marginBottom: v(16), color: c.textSecondary },
+              ]}
+            >
               “{link.title}” will be removed from your saved links. This cannot be undone.
             </Text>
             <Pressable
@@ -154,10 +186,17 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               onPress={handleDelete}
               style={[
                 styles.destructive,
-                { height: v(46), borderRadius: v(14), marginBottom: v(10) },
+                {
+                  height: v(46),
+                  borderRadius: v(14),
+                  marginBottom: v(10),
+                  backgroundColor: c.signoutBg,
+                },
               ]}
             >
-              <Text style={[styles.destructiveText, { fontSize: v(13.5) }]}>Delete</Text>
+              <Text style={[styles.destructiveText, { fontSize: v(13.5), color: c.signoutText }]}>
+                Delete
+              </Text>
             </Pressable>
             <OutlineButton title="Cancel" onPress={() => setConfirming(false)} />
           </View>
@@ -168,11 +207,19 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             onPress={() => setConfirming(true)}
             style={[
               styles.deleteRow,
-              { gap: v(10), height: v(46), borderRadius: v(14), paddingHorizontal: v(14) },
+              {
+                gap: v(10),
+                height: v(46),
+                borderRadius: v(14),
+                paddingHorizontal: v(14),
+                backgroundColor: c.signoutBg,
+              },
             ]}
           >
-            <Icon name="trash" size={v(16)} color={colors.signoutText} />
-            <Text style={[styles.deleteRowText, { fontSize: v(13.5) }]}>Delete link</Text>
+            <Icon name="trash" size={v(16)} color={c.signoutText} />
+            <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.signoutText }]}>
+              Delete link
+            </Text>
           </Pressable>
         )}
       </BottomSheet>
@@ -191,7 +238,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.screenBg },
+  container: { flex: 1 },
   hero: { overflow: 'hidden' },
   heroImage: { position: 'absolute', inset: 0, width: '100%', height: '100%' },
   heroGlow: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.14)' },
@@ -207,32 +254,29 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   body: { flex: 1 },
-  title: { fontWeight: '800', color: colors.textPrimary },
+  title: { fontWeight: '800' },
   source: { flexDirection: 'row', alignItems: 'center' },
   sourceDot: {},
-  favicon: { backgroundColor: colors.screenBgAlt },
-  sourceText: { fontWeight: '500', color: colors.textTertiary },
-  desc: { color: colors.textSecondary },
+  favicon: {},
+  sourceText: { fontWeight: '500' },
+  desc: {},
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
-  rowText: { fontWeight: '600', color: colors.textPrimary },
-  sub: { fontWeight: '500', color: colors.textTertiary },
-  confirmText: { color: colors.textSecondary },
+  rowText: { fontWeight: '600' },
+  sub: { fontWeight: '500' },
+  confirmText: {},
   deleteRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.signoutBg,
   },
-  deleteRowText: { fontWeight: '700', color: colors.signoutText },
+  deleteRowText: { fontWeight: '700' },
   destructive: {
-    backgroundColor: colors.signoutBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  destructiveText: { fontWeight: '700', color: colors.signoutText },
+  destructiveText: { fontWeight: '700' },
 });

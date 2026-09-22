@@ -1,9 +1,14 @@
 import React from 'react';
 import { View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../providers/AuthProvider';
+import { useTheme } from '../providers/ThemeProvider';
 import { BottomNav } from '../../components/BottomNav';
 import { SplashScreen } from '../../features/auth/SplashScreen';
 import { OnboardingScreen } from '../../features/auth/OnboardingScreen';
@@ -55,12 +60,23 @@ function MainTabs() {
 
 export function RootNavigator() {
   const { session, loading } = useAuth();
+  const { dark, c } = useTheme();
+  const navTheme = {
+    ...(dark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(dark ? DarkTheme.colors : DefaultTheme.colors),
+      background: c.screenBg,
+      card: c.screenBg,
+      text: c.textPrimary,
+      border: c.border,
+    },
+  };
   if (loading) {
     // Hold splash while restoring the Supabase session — avoids stack flash.
-    return <View style={{ flex: 1, backgroundColor: '#eef1f5' }} />;
+    return <View style={{ flex: 1, backgroundColor: c.screenBg }} />;
   }
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {session ? (
           <>

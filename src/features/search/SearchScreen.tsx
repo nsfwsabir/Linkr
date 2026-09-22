@@ -5,12 +5,13 @@ import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { AppHeader } from '../../components/AppHeader';
 import { useLinks } from '../../app/providers/LinksProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors } from '../../theme';
 
 export function SearchScreen() {
   const v = useRefScale();
   const { links } = useLinks();
+  const { c } = useTheme();
   const [query, setQuery] = useState('');
 
   const results = useMemo(() => {
@@ -25,7 +26,7 @@ export function SearchScreen() {
   }, [query, links]);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <AppHeader title="Search" />
       <SearchBar value={query} onChangeText={setQuery} />
       <FlatList
@@ -33,7 +34,9 @@ export function SearchScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingHorizontal: v(22) }]}
         ListEmptyComponent={
-          <Text style={[styles.empty, { marginTop: v(32) }]}>No results found.</Text>
+          <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
+            No results found.
+          </Text>
         }
         renderItem={({ item }) => <LinkListItem link={item} />}
       />
@@ -42,7 +45,7 @@ export function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.screenBg },
+  container: { flex: 1 },
   list: {},
-  empty: { color: colors.textTertiary, textAlign: 'center' },
+  empty: { textAlign: 'center' },
 });

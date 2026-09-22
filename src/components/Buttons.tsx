@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, Pressable, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { useRefScale } from '../utils/useRefScale';
 import { Icon, IconName } from './Icon';
-import { colors } from '../theme';
+import { useTheme } from '../app/providers/ThemeProvider';
 
 export function PrimaryButton({
   title,
@@ -18,12 +18,17 @@ export function PrimaryButton({
   accessibilityLabel?: string;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
       onPress={onPress}
-      style={[styles.base, { gap: v(8), height: v(50), borderRadius: v(14), marginTop: v(6) }, style]}
+      style={[
+        styles.base,
+        { gap: v(8), height: v(50), borderRadius: v(14), marginTop: v(6), backgroundColor: c.dark },
+        style,
+      ]}
     >
       {icon ? <Icon name={icon} size={v(16)} color="#fff" /> : null}
       <Text style={[styles.text, { fontSize: v(14.5) }]}>{title}</Text>
@@ -45,15 +50,28 @@ export function OutlineButton({
   textStyle?: TextStyle;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
       onPress={onPress}
-      style={[styles.outline, { gap: v(10), height: v(46), borderRadius: v(14) }, style]}
+      style={[
+        styles.outline,
+        {
+          gap: v(10),
+          height: v(46),
+          borderRadius: v(14),
+          backgroundColor: c.cardBg,
+          borderColor: c.border,
+        },
+        style,
+      ]}
     >
-      {icon ? <Icon name={icon} size={v(18)} color={colors.textPrimary} /> : null}
-      <Text style={[styles.outlineText, { fontSize: v(13.5) }, textStyle]}>{title}</Text>
+      {icon ? <Icon name={icon} size={v(18)} color={c.textPrimary} /> : null}
+      <Text style={[styles.outlineText, { fontSize: v(13.5), color: c.textPrimary }, textStyle]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }
@@ -61,16 +79,13 @@ export function OutlineButton({
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
-    backgroundColor: colors.dark,
     alignItems: 'center',
     justifyContent: 'center',
   },
   text: { color: '#fff', fontWeight: '700' },
   outline: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#14161e',
@@ -79,5 +94,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 1,
   },
-  outlineText: { fontWeight: '600', color: colors.textPrimary },
+  outlineText: { fontWeight: '600' },
 });

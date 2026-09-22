@@ -11,8 +11,8 @@ import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { SaveLinkSheet } from '../links/SaveLinkSheet';
 import { useLinks } from '../../app/providers/LinksProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors } from '../../theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Home'>,
@@ -24,6 +24,7 @@ const TABS = ['All', 'Read Later', 'Work', 'Personal'];
 export function HomeScreen({ navigation }: Props) {
   const v = useRefScale();
   const { links } = useLinks();
+  const { c } = useTheme();
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState('All');
   const [sheetVisible, setSheetVisible] = useState(false);
@@ -39,7 +40,7 @@ export function HomeScreen({ navigation }: Props) {
   }, [query, tab, links]);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <AppHeader
         title="Linker"
         right={
@@ -58,11 +59,20 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => setTab(t)}
             style={[
               styles.tab,
-              { paddingVertical: v(5), paddingHorizontal: v(8), borderRadius: v(20) },
-              tab === t && styles.tabActive,
+              {
+                paddingVertical: v(5),
+                paddingHorizontal: v(8),
+                borderRadius: v(20),
+                backgroundColor: tab === t ? c.dark : c.inputBg,
+              },
             ]}
           >
-            <Text style={[styles.tabText, { fontSize: v(10) }, tab === t && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                { fontSize: v(10), color: tab === t ? '#fff' : c.textSecondary },
+              ]}
+            >
               {t}
             </Text>
           </Pressable>
@@ -73,7 +83,9 @@ export function HomeScreen({ navigation }: Props) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingHorizontal: v(22), paddingBottom: v(16) }]}
         ListEmptyComponent={
-          <Text style={[styles.empty, { marginTop: v(32) }]}>No links yet. Tap + to save one.</Text>
+          <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
+            No links yet. Tap + to save one.
+          </Text>
         }
         renderItem={({ item }) => (
           <LinkListItem link={item} onPress={() => navigation.navigate('LinkDetail', { linkId: item.id })} />
@@ -98,12 +110,10 @@ function tabToCollectionId(tab: string): string {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.screenBg },
+  container: { flex: 1 },
   tabs: { flexDirection: 'row' },
-  tab: { backgroundColor: colors.inputBg },
-  tabActive: { backgroundColor: colors.dark },
-  tabText: { color: colors.textSecondary, fontWeight: '600' },
-  tabTextActive: { color: '#fff' },
+  tab: {},
+  tabText: { fontWeight: '600' },
   list: {},
-  empty: { color: colors.textTertiary, textAlign: 'center' },
+  empty: { textAlign: 'center' },
 });

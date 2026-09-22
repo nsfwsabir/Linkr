@@ -7,21 +7,23 @@ import { LinkListItem } from '../../components/ListItems';
 import { Icon, CollectionIcon } from '../../components/Icon';
 import { mockCollections } from '../../utils/mockData';
 import { useLinks } from '../../app/providers/LinksProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors, collectionThemes } from '../../theme';
+import { themesFor } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CollectionView'>;
 
 export function CollectionViewScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { collectionLinks } = useLinks();
+  const { c } = useTheme();
   const collection =
-    mockCollections.find((c) => c.id === route.params.collectionId) ?? mockCollections[0];
-  const theme = collectionThemes[collection.color_key];
+    mockCollections.find((col) => col.id === route.params.collectionId) ?? mockCollections[0];
+  const theme = themesFor(c)[collection.color_key];
   const iconBtn = v(32);
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <View
         style={[
           styles.navHeader,
@@ -34,7 +36,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
           onPress={() => navigation.goBack()}
           style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
         >
-          <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
+          <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
         </Pressable>
       </View>
       <View
@@ -47,8 +49,8 @@ export function CollectionViewScreen({ route, navigation }: Props) {
           <CollectionIcon iconKey={collection.icon_key} size={v(18)} color={theme.fg} />
         </View>
         <View>
-          <Text style={[styles.name, { fontSize: v(19) }]}>{collection.name}</Text>
-          <Text style={[styles.count, { fontSize: v(12), marginTop: v(2) }]}>
+          <Text style={[styles.name, { fontSize: v(19), color: c.textPrimary }]}>{collection.name}</Text>
+          <Text style={[styles.count, { fontSize: v(12), marginTop: v(2), color: c.textTertiary }]}>
             {collection.link_count} links
           </Text>
         </View>
@@ -58,7 +60,9 @@ export function CollectionViewScreen({ route, navigation }: Props) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingHorizontal: v(22) }]}
         ListEmptyComponent={
-          <Text style={[styles.empty, { marginTop: v(32) }]}>This collection is empty.</Text>
+          <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
+            This collection is empty.
+          </Text>
         }
         renderItem={({ item }) => (
           <LinkListItem
@@ -73,13 +77,13 @@ export function CollectionViewScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.screenBg },
+  container: { flex: 1 },
   navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBtn: { alignItems: 'center', justifyContent: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center' },
   icon: { alignItems: 'center', justifyContent: 'center' },
-  name: { fontWeight: '800', color: colors.textPrimary },
-  count: { color: colors.textTertiary },
+  name: { fontWeight: '800' },
+  count: {},
   list: {},
-  empty: { color: colors.textTertiary, textAlign: 'center' },
+  empty: { textAlign: 'center' },
 });

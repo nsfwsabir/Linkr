@@ -7,6 +7,7 @@ import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
@@ -15,6 +16,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateAccount'>;
 export function CreateAccountScreen({ navigation }: Props) {
   const v = useRefScale();
   const { signUpWithEmail, signInWithEmail, signInMock, isConfigured } = useAuth();
+  const { c } = useTheme();
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -63,14 +65,19 @@ export function CreateAccountScreen({ navigation }: Props) {
           onPress={() => navigation.goBack()}
           style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
         >
-          <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
+          <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
         </Pressable>
       </View>
       <View style={[styles.form, { paddingTop: v(14), paddingHorizontal: v(24) }]}>
-        <Text style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3), marginBottom: v(6) }]}>
+        <Text
+          style={[
+            styles.title,
+            { fontSize: v(23), letterSpacing: v(-0.3), marginBottom: v(6), color: c.textPrimary },
+          ]}
+        >
           {mode === 'signup' ? 'Create your account' : 'Welcome back'}
         </Text>
-        <Text style={[styles.sub, { fontSize: v(13.5), marginBottom: v(24) }]}>
+        <Text style={[styles.sub, { fontSize: v(13.5), marginBottom: v(24), color: c.textSecondary }]}>
           {mode === 'signup' ? 'Get started with Linker' : 'Sign in to Linker'}
         </Text>
         {mode === 'signup' ? (
@@ -97,7 +104,9 @@ export function CreateAccountScreen({ navigation }: Props) {
           }}
           secureTextEntry
         />
-        {error ? <Text style={[styles.error, { fontSize: v(12), marginBottom: v(8) }]}>{error}</Text> : null}
+        {error ? (
+          <Text style={[styles.error, { fontSize: v(12), marginBottom: v(8) }]}>{error}</Text>
+        ) : null}
         <PrimaryButton
           title={busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
           onPress={handleSubmit}
@@ -110,9 +119,11 @@ export function CreateAccountScreen({ navigation }: Props) {
             setError(null);
           }}
         >
-          <Text style={[styles.footer, { fontSize: v(12.5), marginTop: v(16) }]}>
+          <Text style={[styles.footer, { fontSize: v(12.5), marginTop: v(16), color: c.textTertiary }]}>
             {mode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
-            <Text style={styles.signin}>{mode === 'signup' ? 'Sign in' : 'Create one'}</Text>
+            <Text style={[styles.signin, { color: c.textPrimary }]}>
+              {mode === 'signup' ? 'Sign in' : 'Create one'}
+            </Text>
           </Text>
         </Pressable>
       </View>
@@ -124,9 +135,9 @@ const styles = StyleSheet.create({
   navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBtn: { alignItems: 'center', justifyContent: 'center' },
   form: { flex: 1 },
-  title: { fontWeight: '800', color: colors.textPrimary },
-  sub: { color: colors.textSecondary },
+  title: { fontWeight: '800' },
+  sub: {},
   error: { color: colors.pink },
-  footer: { textAlign: 'center', color: colors.textTertiary },
-  signin: { color: colors.textPrimary, fontWeight: '700' },
+  footer: { textAlign: 'center' },
+  signin: { fontWeight: '700' },
 });

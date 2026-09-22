@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
@@ -9,8 +9,8 @@ import { AppHeader, RoundIconButton } from '../../components/AppHeader';
 import { Icon } from '../../components/Icon';
 import { CollectionCard } from '../../components/ListItems';
 import { mockCollections } from '../../utils/mockData';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors } from '../../theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Collections'>,
@@ -19,8 +19,9 @@ type Props = CompositeScreenProps<
 
 export function CollectionsScreen({ navigation }: Props) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <AppHeader
         title="Collections"
         right={
@@ -45,6 +46,6 @@ export function CollectionsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.screenBg },
+  container: { flex: 1 },
   list: {},
 });

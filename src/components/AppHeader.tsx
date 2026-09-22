@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRefScale } from '../utils/useRefScale';
-import { colors } from '../theme';
+import { useTheme } from '../app/providers/ThemeProvider';
 
 export function AppHeader({
   title,
@@ -11,6 +11,7 @@ export function AppHeader({
   right?: ReactNode;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <View
       style={[
@@ -19,7 +20,11 @@ export function AppHeader({
       ]}
       accessibilityRole="header"
     >
-      <Text style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3) }]}>{title}</Text>
+      <Text
+        style={[styles.title, { fontSize: v(23), letterSpacing: v(-0.3), color: c.textPrimary }]}
+      >
+        {title}
+      </Text>
       {right}
     </View>
   );
@@ -37,13 +42,17 @@ export function RoundIconButton({
   dark?: boolean;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   const d = v(33);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={[styles.round, { width: d, height: d, borderRadius: d / 2 }, dark && styles.roundDark]}
+      style={[
+        styles.round,
+        { width: d, height: d, borderRadius: d / 2, backgroundColor: dark ? c.dark : c.inputBg },
+      ]}
       hitSlop={8}
     >
       {children}
@@ -53,7 +62,6 @@ export function RoundIconButton({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontWeight: '800', color: colors.textPrimary },
-  round: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.inputBg },
-  roundDark: { backgroundColor: colors.dark },
+  title: { fontWeight: '800' },
+  round: { alignItems: 'center', justifyContent: 'center' },
 });

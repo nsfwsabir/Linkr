@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet, TextInputProps } from 'react-native';
 import { useRefScale } from '../utils/useRefScale';
 import { Icon, IconName } from './Icon';
-import { colors } from '../theme';
+import { useTheme } from '../app/providers/ThemeProvider';
 
 const FIELD_ICON_COLOR = '#a7abb3';
 
@@ -11,6 +11,7 @@ export function AppTextInput({
   ...props
 }: TextInputProps & { icon?: IconName }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <View
       style={[
@@ -21,13 +22,14 @@ export function AppTextInput({
           borderRadius: v(14),
           paddingHorizontal: v(15),
           marginBottom: v(12),
+          backgroundColor: c.inputBg,
         },
       ]}
     >
       {icon ? <Icon name={icon} size={v(17)} color={FIELD_ICON_COLOR} /> : null}
       <TextInput
-        placeholderTextColor={colors.textTertiary}
-        style={[styles.input, { fontSize: v(13.5) }]}
+        placeholderTextColor={c.textTertiary}
+        style={[styles.input, { fontSize: v(13.5), color: c.textPrimary }]}
         {...props}
       />
     </View>
@@ -44,6 +46,7 @@ export function SearchBar({
   placeholder?: string;
 }) {
   const v = useRefScale();
+  const { c } = useTheme();
   return (
     <View
       style={[
@@ -55,6 +58,7 @@ export function SearchBar({
           marginHorizontal: v(22),
           marginBottom: v(12),
           paddingHorizontal: v(14),
+          backgroundColor: c.inputBg,
         },
       ]}
     >
@@ -65,8 +69,8 @@ export function SearchBar({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.textTertiary}
-        style={[styles.searchInput, { fontSize: v(13) }]}
+        placeholderTextColor={c.textTertiary}
+        style={[styles.searchInput, { fontSize: v(13), color: c.textPrimary }]}
       />
     </View>
   );
@@ -76,9 +80,8 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBg,
   },
-  input: { flex: 1, color: colors.textPrimary },
-  search: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.inputBg },
-  searchInput: { flex: 1, color: colors.textPrimary },
+  input: { flex: 1 },
+  search: { flexDirection: 'row', alignItems: 'center' },
+  searchInput: { flex: 1 },
 });

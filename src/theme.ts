@@ -103,3 +103,94 @@ export const collectionThemes: Record<
   teal: { bg: colors.tealBg, fg: colors.teal },
   orange: { bg: colors.orangeBg, fg: colors.orange },
 };
+
+export type Palette = {
+  boardBg: string;
+  screenBg: string;
+  screenBgAlt: string;
+  cardBg: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  border: string;
+  inputBg: string;
+  avatarBg: string;
+  blue: string;
+  blueBg: string;
+  pink: string;
+  pinkBg: string;
+  orange: string;
+  orangeBg: string;
+  teal: string;
+  tealBg: string;
+  dark: string;
+  white: string;
+  signoutBg: string;
+  signoutText: string;
+  overlay: string;
+};
+
+export const lightPalette: Palette = {
+  boardBg: colors.boardBg,
+  screenBg: colors.screenBg,
+  screenBgAlt: colors.screenBgAlt,
+  cardBg: '#ffffff',
+  textPrimary: colors.textPrimary,
+  textSecondary: colors.textSecondary,
+  textTertiary: colors.textTertiary,
+  border: colors.border,
+  inputBg: colors.inputBg,
+  avatarBg: '#dfe2e8',
+  blue: colors.blue,
+  blueBg: colors.blueBg,
+  pink: colors.pink,
+  pinkBg: colors.pinkBg,
+  orange: colors.orange,
+  orangeBg: colors.orangeBg,
+  teal: colors.teal,
+  tealBg: colors.tealBg,
+  dark: colors.dark,
+  white: colors.white,
+  signoutBg: colors.signoutBg,
+  signoutText: colors.signoutText,
+  overlay: colors.overlay,
+};
+
+export const darkPalette: Palette = {
+  boardBg: '#0e1013',
+  screenBg: colors.screenBgDark,
+  screenBgAlt: '#1a1d22',
+  cardBg: '#1e2126',
+  textPrimary: '#eef0f4',
+  textSecondary: '#9aa0a8',
+  textTertiary: '#71767e',
+  border: colors.borderDark,
+  inputBg: colors.inputBgDark,
+  avatarBg: '#2a2d36',
+  blue: colors.blue,
+  blueBg: '#1b2a4a',
+  pink: colors.pink,
+  pinkBg: '#3d1a26',
+  orange: colors.orange,
+  orangeBg: '#3a2e1a',
+  teal: colors.teal,
+  tealBg: '#12332f',
+  dark: '#2a2d36',
+  white: colors.white,
+  signoutBg: colors.signoutBgDark,
+  signoutText: colors.signoutTextDark,
+  overlay: colors.overlay,
+};
+
+export function getPalette(dark: boolean): Palette {
+  return dark ? darkPalette : lightPalette;
+}
+
+export function themesFor(c: Palette): Record<CollectionColorKey, { bg: string; fg: string }> {
+  return {
+    pink: { bg: c.pinkBg, fg: c.pink },
+    blue: { bg: c.blueBg, fg: c.blue },
+    teal: { bg: c.tealBg, fg: c.teal },
+    orange: { bg: c.orangeBg, fg: c.orange },
+  };
+}
