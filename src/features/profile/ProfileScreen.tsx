@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -7,10 +7,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../../app/navigation/RootNavigator';
 import { AppHeader } from '../../components/AppHeader';
 import { Icon, IconName } from '../../components/Icon';
+import { BottomSheet } from '../../components/BottomSheet';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { mockUser } from '../../utils/mockData';
 import { useRefScale } from '../../utils/useRefScale';
+import { pendingMutations, drainMutations } from '../sync/queue';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Settings'>,
@@ -23,6 +25,8 @@ export function ProfileScreen({ navigation }: Props) {
   const v = useRefScale();
   const { signOut, user } = useAuth();
   const { dark, c, toggleDark } = useTheme();
+  const [infoVisible, setInfoVisible] = useState<'help' | 'about' | null>(null);
+  const [syncCount, setSyncCount] = useState(() => pendingMutations().length);
   const displayName =
     (user as { user_metadata?: { display_name?: string } })?.user_metadata?.display_name ??
     (user as { name?: string })?.name ??
@@ -30,10 +34,23 @@ export function ProfileScreen({ navigation }: Props) {
   const email = (user as { email?: string })?.email ?? mockUser.email;
   const avatar = v(50);
 
+  const handleSync = () => {
+    void drainMutations(async () => {
+      /* Mock drain: backend applies ops idempotently when online. */
+    }).then(() => {
+      setSyncCount(pendingMutations().length);
+    });
+  };
+
   const rows: Row[] = [
-    { label: 'Sync', icon: 'refresh', value: 'On' },
-    { label: 'Help & Support', icon: 'help', value: '' },
-    { label: 'About', icon: 'info', value: '' },
+    {
+      label: 'Sync',
+      icon: 'refresh',
+      value: syncCount > 0 ? `${syncCount} pending` : 'On',
+      onPress: handleSync,
+    },
+    { label: 'Help & Support', icon: 'help', value: '', onPress: () => setInfoVisible('help') },
+    { label: 'About', icon: 'info', value: '', onPress: () => setInfoVisible('about') },
     {
       label: 'Dark mode',
       icon: 'settings',
@@ -48,7 +65,10 @@ export function ProfileScreen({ navigation }: Props) {
       style={[styles.container, { backgroundColor: c.screenBg, paddingBottom: v(96) }]}
     >
       <AppHeader title="Settings" />
-      <View
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Edit profile"
+        onPress={() => navigation.navigate('EditProfile')}
         style={[
           styles.profileRow,
           { gap: v(13), paddingTop: v(4), paddingHorizontal: v(22), paddingBottom: v(20) },
@@ -64,7 +84,7 @@ export function ProfileScreen({ navigation }: Props) {
         >
           <Icon name="user" size={v(24)} color="#9aa0a8" />
         </View>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={[styles.name, { fontSize: v(15.5), color: c.textPrimary }]}>
             {displayName}
           </Text>
@@ -72,7 +92,8 @@ export function ProfileScreen({ navigation }: Props) {
             {email}
           </Text>
         </View>
-      </View>
+        <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
+      </Pressable>
       <View style={[styles.menu, { paddingHorizontal: v(22) }]}>
         {rows.map((r) => {
           const inner = (
@@ -136,6 +157,17 @@ export function ProfileScreen({ navigation }: Props) {
           Sign Out
         </Text>
       </Pressable>
+      <BottomSheet
+        visible={infoVisible !== null}
+        title={infoVisible === 'help' ? 'Help & Support' : 'About'}
+        onClose={() => setInfoVisible(null)}
+      >
+        <Text style={[styles.sheetBody, { fontSize: v(13), lineHeight: v(20), color: c.textSecondary }]}>
+          {infoVisible === 'help'
+            ? 'Questions or feedback? Reach us at support@linker.app and we will get back within one business day.'
+            : 'Linker 1.0.0 — save links, organize them into collections, and come back to what matters.'}
+        </Text>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -157,4 +189,5 @@ const styles = StyleSheet.create({
   value: {},
   signout: { alignItems: 'center', justifyContent: 'center' },
   signoutText: { fontWeight: '700' },
+  sheetBody: { fontWeight: '500', marginBottom: 8 },
 });

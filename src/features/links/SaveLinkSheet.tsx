@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { BottomSheet } from '../../components/BottomSheet';
 import { Icon } from '../../components/Icon';
 import { AppTextInput } from '../../components/Inputs';
@@ -9,7 +9,7 @@ import { isValidUrl, faviconUrl } from '../../utils/url';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors } from '../../theme';
+import { colors, themesFor } from '../../theme';
 
 const DEBOUNCE_MS = 600;
 
@@ -22,6 +22,8 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
   const [collectionId, setCollectionId] = useState(collections[0]?.id ?? '');
   const [error, setError] = useState<string | null>(null);
   const [thumbFailed, setThumbFailed] = useState(false);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const theme = themesFor(c);
 
   const valid = isValidUrl(url);
   const domain = valid ? url.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '').replace(/^www\./i, '') : '';
@@ -130,7 +132,10 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
       <Text style={[styles.label, { fontSize: v(12), marginBottom: v(8), color: c.textSecondary }]}>
         Add to collection
       </Text>
-      <View
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Choose collection"
+        onPress={() => setPickerVisible(true)}
         style={[
           styles.dropdown,
           {
@@ -148,7 +153,48 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
           {selectedCollection?.name ?? 'Read Later'}
         </Text>
         <Icon name="chevronDown" size={v(15)} color={c.textTertiary} />
-      </View>
+      </Pressable>
+      <BottomSheet
+        visible={pickerVisible}
+        title="Add to collection"
+        onClose={() => setPickerVisible(false)}
+      >
+        {collections.map((col) => {
+          const selected = col.id === (selectedCollection?.id ?? collectionId);
+          const t = theme[col.color_key];
+          return (
+            <Pressable
+              key={col.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={col.name}
+              onPress={() => {
+                setCollectionId(col.id);
+                setPickerVisible(false);
+              }}
+              style={[
+                styles.pickRow,
+                {
+                  gap: v(12),
+                  paddingVertical: v(11),
+                  paddingHorizontal: v(12),
+                  borderRadius: v(14),
+                  marginBottom: v(8),
+                  backgroundColor: selected ? t.bg : c.inputBg,
+                },
+              ]}
+            >
+              <View style={[styles.pickIcon, { backgroundColor: c.cardBg, width: v(32), height: v(32), borderRadius: v(10) }]}>
+                <Icon name="folder" size={v(15)} color={t.fg} />
+              </View>
+              <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
+                {col.name}
+              </Text>
+              {selected ? <Icon name="chevronRight" size={v(15)} color={t.fg} /> : null}
+            </Pressable>
+          );
+        })}
+      </BottomSheet>
       {error ? (
         <Text style={[styles.error, { fontSize: v(12), marginBottom: v(8) }]}>{error}</Text>
       ) : null}
@@ -174,6 +220,9 @@ const styles = StyleSheet.create({
   label: { fontWeight: '700' },
   dropdown: { flexDirection: 'row', alignItems: 'center' },
   dropdownText: { flex: 1, fontWeight: '600' },
+  pickRow: { flexDirection: 'row', alignItems: 'center' },
+  pickIcon: { alignItems: 'center', justifyContent: 'center' },
+  pickName: { fontWeight: '700' },
   error: { color: colors.pink },
   hidden: { display: 'none' },
 });

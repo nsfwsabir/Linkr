@@ -102,7 +102,9 @@ export function CollectionViewScreen({ route, navigation }: Props) {
           <LinkListItem
             link={item}
             showDots
-            onPress={() => navigation.navigate('LinkDetail', { linkId: item.id })}
+            onPress={() => {
+              navigation.navigate('LinkDetail', { linkId: item.id });
+            }}
           />
         )}
       />

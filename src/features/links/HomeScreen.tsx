@@ -78,8 +78,9 @@ export function HomeScreen({ navigation }: Props) {
           style={[
             styles.tab,
             {
-              paddingVertical: v(5),
-              paddingHorizontal: v(8),
+              paddingVertical: v(6),
+              paddingHorizontal: v(10),
+              minHeight: v(30),
               borderRadius: v(20),
               backgroundColor: filterId === null ? c.dark : c.inputBg,
             },
@@ -88,8 +89,9 @@ export function HomeScreen({ navigation }: Props) {
           <Text
             style={[
               styles.tabText,
-              { fontSize: v(10), color: filterId === null ? '#fff' : c.textSecondary },
+              { fontSize: v(11), color: filterId === null ? '#fff' : c.textSecondary },
             ]}
+            numberOfLines={1}
           >
             All
           </Text>
@@ -105,8 +107,9 @@ export function HomeScreen({ navigation }: Props) {
               style={[
                 styles.tab,
                 {
-                  paddingVertical: v(5),
-                  paddingHorizontal: v(8),
+                  paddingVertical: v(6),
+                  paddingHorizontal: v(10),
+                  minHeight: v(30),
                   borderRadius: v(20),
                   backgroundColor: selected ? c.dark : c.inputBg,
                 },
@@ -115,7 +118,7 @@ export function HomeScreen({ navigation }: Props) {
               <Text
                 style={[
                   styles.tabText,
-                  { fontSize: v(10), color: selected ? '#fff' : c.textSecondary },
+                  { fontSize: v(11), color: selected ? '#fff' : c.textSecondary },
                 ]}
                 numberOfLines={1}
               >
@@ -132,14 +135,15 @@ export function HomeScreen({ navigation }: Props) {
             style={[
               styles.tab,
               {
-                paddingVertical: v(5),
-                paddingHorizontal: v(8),
+                paddingVertical: v(6),
+                paddingHorizontal: v(10),
+                minHeight: v(30),
                 borderRadius: v(20),
                 backgroundColor: c.inputBg,
               },
             ]}
           >
-            <Text style={[styles.tabText, { fontSize: v(10), color: c.textSecondary }]}>More</Text>
+            <Text style={[styles.tabText, { fontSize: v(11), color: c.textSecondary }]}>More</Text>
           </Pressable>
         ) : null}
       </ScrollView>
@@ -153,7 +157,12 @@ export function HomeScreen({ navigation }: Props) {
           </Text>
         }
         renderItem={({ item }) => (
-          <LinkListItem link={item} onPress={() => navigation.navigate('LinkDetail', { linkId: item.id })} />
+          <LinkListItem
+            link={item}
+            onPress={() => {
+              navigation.navigate('LinkDetail', { linkId: item.id });
+            }}
+          />
         )}
       />
       <SaveLinkSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
@@ -164,8 +173,8 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   tabs: { flexGrow: 0, flexShrink: 0 },
-  tab: { flexGrow: 0, flexShrink: 0 },
-  tabText: { fontWeight: '600' },
+  tab: { flexGrow: 0, flexShrink: 0, justifyContent: 'center' },
+  tabText: { fontWeight: '600', flexShrink: 0 },
   list: {},
   empty: { textAlign: 'center' },
 });

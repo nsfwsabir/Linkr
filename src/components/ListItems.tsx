@@ -63,6 +63,7 @@ export function LinkListItem({
       accessibilityRole="button"
       accessibilityLabel={link.title}
       onPress={onPress}
+      hitSlop={6}
       style={[styles.row, { gap: v(11), paddingVertical: v(9) }]}
     >
       <Thumb spec={link.thumb} />
@@ -76,11 +77,13 @@ export function LinkListItem({
         </Text>
       </View>
       {showDots ? (
-        <View style={[styles.dots, { marginLeft: v(4) }]}>
+        <View style={[styles.dots, { marginLeft: v(4) }]} pointerEvents="none">
           <Icon name="dots" size={v(16)} color={c.textTertiary} />
         </View>
       ) : (
-        <Text style={[styles.time, { fontSize: v(10.5), marginLeft: v(4), color: c.textTertiary }]}>
+        <Text
+          style={[styles.time, { fontSize: v(10.5), marginLeft: v(4), color: c.textTertiary }]}
+        >
           {link.saved_at}
         </Text>
       )}
@@ -142,7 +145,7 @@ export function CollectionCard({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
   thumb: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -12,13 +12,13 @@ import { faviconUrl } from '../../utils/url';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { colors } from '../../theme';
+import { colors, themesFor } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
 
 export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
-  const { links, collections, deleteLink } = useLinks();
+  const { links, collections, deleteLink, setLinkCollection } = useLinks();
   const { c } = useTheme();
   const link = links.find((l) => l.id === route.params.linkId);
 
@@ -32,6 +32,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
 
   useEffect(() => {
     setFaviconFailed(false);
@@ -59,6 +60,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const iconUri = faviconFailed ? null : faviconUrl(link.source_domain);
   const description = link.description ?? metadata?.description ?? '';
   const fab = v(32);
+  const theme = themesFor(c);
 
   const closeActions = () => {
     setActionsVisible(false);
@@ -69,6 +71,11 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     deleteLink(link.id);
     closeActions();
     navigation.goBack();
+  };
+
+  const pickCollection = (collectionId: string) => {
+    setLinkCollection(link.id, collectionId);
+    setCollectionPickerVisible(false);
   };
 
   return (
@@ -156,7 +163,10 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           </Text>
         ) : null}
         <PrimaryButton title="Open Link" icon="external" onPress={openLink} />
-        <View
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Add to collection"
+          onPress={() => setCollectionPickerVisible(true)}
           style={[
             styles.row,
             { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
@@ -166,8 +176,11 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             Add to collection
           </Text>
           <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
-        </View>
-        <View
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change collection"
+          onPress={() => setCollectionPickerVisible(true)}
           style={[
             styles.row,
             { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
@@ -181,8 +194,47 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             </Text>
           </View>
           <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
-        </View>
+        </Pressable>
       </View>
+
+      <BottomSheet
+        visible={collectionPickerVisible}
+        title="Add to collection"
+        onClose={() => setCollectionPickerVisible(false)}
+      >
+        {collections.map((col) => {
+          const selected = col.id === collection?.id;
+          const t = theme[col.color_key];
+          return (
+            <Pressable
+              key={col.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={col.name}
+              onPress={() => pickCollection(col.id)}
+              style={[
+                styles.pickRow,
+                {
+                  gap: v(12),
+                  paddingVertical: v(11),
+                  paddingHorizontal: v(12),
+                  borderRadius: v(14),
+                  marginBottom: v(8),
+                  backgroundColor: selected ? t.bg : c.inputBg,
+                },
+              ]}
+            >
+              <View style={[styles.pickIcon, { backgroundColor: t.bg, width: v(32), height: v(32), borderRadius: v(10) }]}>
+                <Icon name="folder" size={v(15)} color={t.fg} />
+              </View>
+              <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
+                {col.name}
+              </Text>
+              {selected ? <Icon name="chevronRight" size={v(15)} color={t.fg} /> : null}
+            </Pressable>
+          );
+        })}
+      </BottomSheet>
 
       <BottomSheet
         visible={actionsVisible}
@@ -277,6 +329,9 @@ const styles = StyleSheet.create({
   },
   rowText: { fontWeight: '600' },
   sub: { fontWeight: '500' },
+  pickRow: { flexDirection: 'row', alignItems: 'center' },
+  pickIcon: { alignItems: 'center', justifyContent: 'center' },
+  pickName: { fontWeight: '700' },
   confirmText: {},
   deleteRow: {
     flexDirection: 'row',

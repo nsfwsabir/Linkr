@@ -25,3 +25,23 @@ export function dequeueMutation(opId: string) {
   const i = queue.findIndex((o) => o.opId === opId);
   if (i >= 0) queue.splice(i, 1);
 }
+
+/**
+ * Drain the queue through `send` (server apply). Stops on the first failure so
+ * ops stay ordered; successful ops are removed. Returns how many drained.
+ */
+export async function drainMutations(
+  send: (op: MutationOp) => Promise<void>,
+): Promise<number> {
+  let drained = 0;
+  for (const op of pendingMutations()) {
+    try {
+      await send(op);
+      dequeueMutation(op.opId);
+      drained += 1;
+    } catch {
+      break;
+    }
+  }
+  return drained;
+}
