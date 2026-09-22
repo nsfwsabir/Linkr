@@ -31,12 +31,6 @@ export function ProfileScreen({ navigation }: Props) {
   const avatar = v(50);
 
   const rows: Row[] = [
-    {
-      label: 'Settings',
-      icon: 'settings',
-      value: '',
-      onPress: () => navigation.navigate('EditProfile'),
-    },
     { label: 'Sync', icon: 'refresh', value: 'On' },
     { label: 'Help & Support', icon: 'help', value: '' },
     { label: 'About', icon: 'info', value: '' },

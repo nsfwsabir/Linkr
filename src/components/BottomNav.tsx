@@ -26,7 +26,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.host, { left: v(14), right: v(14), bottom: insets.bottom + v(10) }]}
+      style={[styles.host, { left: v(44), right: v(44), bottom: insets.bottom + v(10) }]}
     >
       <BlurView
         intensity={dark ? 45 : 65}
@@ -62,7 +62,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
               onPress={() => {
                 if (route) navigation.navigate(route.name);
               }}
-              style={[styles.item, { gap: v(3), minWidth: v(64), paddingVertical: v(4) }]}
+              style={[styles.item, { gap: v(3), minWidth: v(56), paddingVertical: v(4) }]}
             >
               <Icon name={t.icon} size={v(21)} color={color} />
               <Text

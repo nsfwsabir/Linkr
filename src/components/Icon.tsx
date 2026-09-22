@@ -196,8 +196,16 @@ export function Icon({
     case 'settings':
       return (
         <Stroke size={size} color={color} width={2}>
-          <Circle cx="12" cy="12" r="3.2" />
-          <Path d="M12 2.5v3.2M12 18.3v3.2M4.3 4.3l2.3 2.3M17.4 17.4l2.3 2.3M1.5 12h3.2M19.3 12h3.2M4.3 19.7l2.3-2.3M17.4 6.6l2.3-2.3" />
+          <Circle cx="12" cy="12" r="7" />
+          <Circle cx="12" cy="12" r="2.8" />
+          <Line x1="12" y1="2.5" x2="12" y2="5" />
+          <Line x1="12" y1="19" x2="12" y2="21.5" />
+          <Line x1="19" y1="12" x2="21.5" y2="12" />
+          <Line x1="2.5" y1="12" x2="5" y2="12" />
+          <Line x1="16.95" y1="7.05" x2="18.72" y2="5.28" />
+          <Line x1="7.05" y1="7.05" x2="5.28" y2="5.28" />
+          <Line x1="16.95" y1="16.95" x2="18.72" y2="18.72" />
+          <Line x1="7.05" y1="16.95" x2="5.28" y2="18.72" />
         </Stroke>
       );
     case 'refresh':
