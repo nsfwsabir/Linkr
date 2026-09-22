@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, FlatList, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
@@ -19,25 +19,76 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-const TABS = ['All', 'Read Later', 'Work', 'Personal'];
+const ALL = 'all';
+const QUICK_VISIBLE = 3;
 
 export function HomeScreen({ navigation }: Props) {
   const v = useRefScale();
-  const { links } = useLinks();
+  const { links, collections } = useLinks();
   const { c } = useTheme();
   const [query, setQuery] = useState('');
-  const [tab, setTab] = useState('All');
+  const [filterId, setFilterId] = useState<string>(ALL);
   const [sheetVisible, setSheetVisible] = useState(false);
+
+  const quickCollections = useMemo(() => collections.slice(0, QUICK_VISIBLE), [collections]);
+  const hasMoreCollections = collections.length > QUICK_VISIBLE;
+
+  useEffect(() => {
+    if (filterId !== ALL && !collections.some((col) => col.id === filterId)) {
+      setFilterId(ALL);
+    }
+  }, [collections, filterId]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return links.filter((l) => {
       const matchesQuery =
         !q || l.title.toLowerCase().includes(q) || l.source_domain.toLowerCase().includes(q);
-      const matchesTab = tab === 'All' || l.collection_ids?.includes(tabToCollectionId(tab));
-      return matchesQuery && matchesTab;
+      const matchesFilter = filterId === ALL || l.collection_ids?.includes(filterId);
+      return matchesQuery && matchesFilter;
     });
-  }, [query, tab, links]);
+  }, [query, filterId, links]);
+
+  const emptyMessage = useMemo(() => {
+    if (query.trim()) return 'No links match your search.';
+    if (filterId !== ALL) {
+      const col = collections.find((x) => x.id === filterId);
+      return col ? `No links in ${col.name} yet.` : 'No links yet. Tap + to save one.';
+    }
+    return 'No links yet. Tap + to save one.';
+  }, [query, filterId, collections]);
+
+  const renderPill = (
+    key: string,
+    label: string,
+    selected: boolean,
+    onPress: () => void,
+  ) => (
+    <Pressable
+      key={key}
+      accessibilityRole="tab"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[
+        styles.tab,
+        {
+          paddingVertical: v(5),
+          paddingHorizontal: v(8),
+          borderRadius: v(20),
+          backgroundColor: selected ? c.dark : c.inputBg,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.tabText,
+          { fontSize: v(10), color: selected ? '#fff' : c.textSecondary },
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
@@ -50,33 +101,20 @@ export function HomeScreen({ navigation }: Props) {
         }
       />
       <SearchBar value={query} onChangeText={setQuery} />
-      <View style={[styles.tabs, { gap: v(4), marginHorizontal: v(20), marginBottom: v(10) }]}>
-        {TABS.map((t) => (
-          <Pressable
-            key={t}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: tab === t }}
-            onPress={() => setTab(t)}
-            style={[
-              styles.tab,
-              {
-                paddingVertical: v(5),
-                paddingHorizontal: v(8),
-                borderRadius: v(20),
-                backgroundColor: tab === t ? c.dark : c.inputBg,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                { fontSize: v(10), color: tab === t ? '#fff' : c.textSecondary },
-              ]}
-            >
-              {t}
-            </Text>
-          </Pressable>
-        ))}
+      <View style={[styles.tabsWrap, { marginHorizontal: v(20), marginBottom: v(10) }]}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: v(4) }}
+        >
+          {renderPill('all', 'All', filterId === ALL, () => setFilterId(ALL))}
+          {quickCollections.map((col) =>
+            renderPill(col.id, col.name, filterId === col.id, () => setFilterId(col.id)),
+          )}
+          {hasMoreCollections
+            ? renderPill('more', 'More', false, () => navigation.navigate('Collections'))
+            : null}
+        </ScrollView>
       </View>
       <FlatList
         data={filtered}
@@ -84,7 +122,7 @@ export function HomeScreen({ navigation }: Props) {
         contentContainerStyle={[styles.list, { paddingHorizontal: v(22), paddingBottom: v(96) }]}
         ListEmptyComponent={
           <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
-            No links yet. Tap + to save one.
+            {emptyMessage}
           </Text>
         }
         renderItem={({ item }) => (
@@ -96,21 +134,9 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-function tabToCollectionId(tab: string): string {
-  switch (tab) {
-    case 'Read Later':
-      return 'c-read-later';
-    case 'Work':
-      return 'c-work';
-    case 'Personal':
-      return 'c-personal';
-    default:
-      return '';
-  }
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  tabsWrap: {},
   tabs: { flexDirection: 'row' },
   tab: {},
   tabText: { fontWeight: '600' },

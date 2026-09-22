@@ -14,7 +14,6 @@ export const mockCollections: Collection[] = [
     name: 'Read Later',
     icon_key: 'heart',
     color_key: 'pink',
-    link_count: 12,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -24,7 +23,6 @@ export const mockCollections: Collection[] = [
     name: 'Work',
     icon_key: 'briefcase',
     color_key: 'blue',
-    link_count: 8,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -34,7 +32,6 @@ export const mockCollections: Collection[] = [
     name: 'Personal',
     icon_key: 'user',
     color_key: 'teal',
-    link_count: 6,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -44,7 +41,6 @@ export const mockCollections: Collection[] = [
     name: 'Inspiration',
     icon_key: 'sparkles',
     color_key: 'orange',
-    link_count: 15,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -54,7 +50,6 @@ export const mockCollections: Collection[] = [
     name: 'Tools',
     icon_key: 'box',
     color_key: 'blue',
-    link_count: 9,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -140,7 +135,7 @@ export const mockLinks: Link[] = [
   },
 ];
 
-/** Collection View rows — exact content from the HTML source. */
+/** Additional Collection View rows — exact content from the HTML source. */
 export const mockCollectionLinks: Link[] = [
   {
     id: 'cv-1',
@@ -184,7 +179,7 @@ export const mockCollectionLinks: Link[] = [
     metadata_status: 'ready',
     saved_at: '3d ago',
     updated_at: new Date().toISOString(),
-    collection_ids: ['c-read-later'],
+    collection_ids: ['c-personal'],
     thumb: { bg: '#dcdfe4' },
   },
   {
@@ -199,7 +194,7 @@ export const mockCollectionLinks: Link[] = [
     metadata_status: 'ready',
     saved_at: '5d ago',
     updated_at: new Date().toISOString(),
-    collection_ids: ['c-read-later'],
+    collection_ids: ['c-personal'],
     thumb: { bg: '#000', label: 'M', labelColor: '#fff' },
   },
 ];

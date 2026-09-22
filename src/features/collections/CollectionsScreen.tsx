@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -8,7 +8,7 @@ import { MainTabParamList, RootStackParamList } from '../../app/navigation/RootN
 import { AppHeader, RoundIconButton } from '../../components/AppHeader';
 import { Icon } from '../../components/Icon';
 import { CollectionCard } from '../../components/ListItems';
-import { mockCollections } from '../../utils/mockData';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 
@@ -20,6 +20,17 @@ type Props = CompositeScreenProps<
 export function CollectionsScreen({ navigation }: Props) {
   const v = useRefScale();
   const { c } = useTheme();
+  const { collections, collectionCounts } = useLinks();
+
+  const data = useMemo(
+    () =>
+      collections.map((col) => ({
+        ...col,
+        link_count: collectionCounts[col.id] ?? 0,
+      })),
+    [collections, collectionCounts],
+  );
+
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
       <AppHeader
@@ -31,7 +42,7 @@ export function CollectionsScreen({ navigation }: Props) {
         }
       />
       <FlatList
-        data={mockCollections}
+        data={data}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingHorizontal: v(20), paddingBottom: v(96) }]}
         renderItem={({ item }) => (

@@ -6,7 +6,7 @@ import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { useLinkPreview } from './useLinkPreview';
 import { isValidUrl, extractDomain, faviconUrl } from '../../utils/url';
-import { mockCollections } from '../../utils/mockData';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
@@ -16,11 +16,13 @@ const DEBOUNCE_MS = 600;
 export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const v = useRefScale();
   const { c } = useTheme();
+  const { collections, addLink } = useLinks();
   const [url, setUrl] = useState('https://example.com');
   const [debouncedUrl, setDebouncedUrl] = useState(url);
-  const [collection, setCollection] = useState(mockCollections[0].name);
+  const [collectionId, setCollectionId] = useState(() => collections[0]?.id ?? '');
   const [error, setError] = useState<string | null>(null);
   const [thumbFailed, setThumbFailed] = useState(false);
+  const collection = collections.find((col) => col.id === collectionId)?.name ?? 'Read Later';
 
   const valid = isValidUrl(url);
   const domain = valid ? extractDomain(url) : '';
@@ -43,6 +45,12 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
       return;
     }
     setError(null);
+    addLink({
+      url: url.trim(),
+      title: liveTitle ?? (domain ? domain : 'Untitled link'),
+      description: liveDesc,
+      collectionId,
+    });
     onClose();
   };
 

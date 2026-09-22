@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
-import { mockCollections, mockLinks } from '../../utils/mockData';
 import { PrimaryButton, OutlineButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
 import { BottomSheet } from '../../components/BottomSheet';
@@ -19,15 +18,12 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
 
 export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
-  const { links, collectionLinks, deleteLink } = useLinks();
+  const { links, collections, deleteLink } = useLinks();
   const { c } = useTheme();
-  const link =
-    links.find((l) => l.id === route.params.linkId) ??
-    collectionLinks.find((l) => l.id === route.params.linkId) ??
-    links.find((l) => l.id === 'l-sleep') ??
-    collectionLinks[0] ??
-    mockLinks[0];
-  const collection = mockCollections[0];
+  const link = links.find((l) => l.id === route.params.linkId);
+  const collection = link
+    ? collections.find((col) => link.collection_ids?.includes(col.id))
+    : undefined;
   const { metadata } = useLinkPreview(link.original_url);
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(false);
@@ -158,7 +154,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           <View>
             <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>Saved</Text>
             <Text style={[styles.sub, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
-              {link.saved_at} · {collection.name}
+              {link.saved_at}{collection ? ` · ${collection.name}` : ''}
             </Text>
           </View>
           <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />

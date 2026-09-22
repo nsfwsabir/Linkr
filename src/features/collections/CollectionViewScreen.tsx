@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Pressable, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { LinkListItem } from '../../components/ListItems';
 import { Icon, CollectionIcon } from '../../components/Icon';
-import { mockCollections } from '../../utils/mockData';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
@@ -15,12 +14,44 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CollectionView'>;
 
 export function CollectionViewScreen({ route, navigation }: Props) {
   const v = useRefScale();
-  const { collectionLinks } = useLinks();
+  const { links, collections, collectionCounts } = useLinks();
   const { c } = useTheme();
-  const collection =
-    mockCollections.find((col) => col.id === route.params.collectionId) ?? mockCollections[0];
-  const theme = themesFor(c)[collection.color_key];
+  const collection = collections.find((col) => col.id === route.params.collectionId);
+
+  const collectionLinks = useMemo(
+    () => (collection ? links.filter((l) => l.collection_ids?.includes(collection.id)) : []),
+    [links, collection],
+  );
+
+  const notFound = !collection;
+  const theme = notFound ? themesFor(c).pink : themesFor(c)[collection.color_key];
   const iconBtn = v(32);
+  const count = collection ? (collectionCounts[collection.id] ?? 0) : 0;
+
+  if (notFound) {
+    return (
+      <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
+        <View
+          style={[
+            styles.navHeader,
+            { paddingTop: v(10), paddingHorizontal: v(22), paddingBottom: v(4) },
+          ]}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            onPress={() => navigation.goBack()}
+            style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
+          >
+            <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
+          </Pressable>
+        </View>
+        <Text style={[styles.empty, { marginTop: v(32), paddingHorizontal: v(22), color: c.textTertiary }]}>
+          Collection not found.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
@@ -51,7 +82,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
         <View>
           <Text style={[styles.name, { fontSize: v(19), color: c.textPrimary }]}>{collection.name}</Text>
           <Text style={[styles.count, { fontSize: v(12), marginTop: v(2), color: c.textTertiary }]}>
-            {collection.link_count} links
+            {count} links
           </Text>
         </View>
       </View>
