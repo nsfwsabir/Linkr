@@ -9,6 +9,7 @@ import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { themesFor } from '../../theme';
+import { openLinkDetail } from '../../utils/navigateLinkDetail';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CollectionView'>;
 
@@ -103,7 +104,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
             link={item}
             showDots
             onPress={() => {
-              navigation.navigate('LinkDetail', { linkId: item.id });
+              openLinkDetail(navigation, item.id);
             }}
           />
         )}

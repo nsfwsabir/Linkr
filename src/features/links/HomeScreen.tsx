@@ -13,6 +13,7 @@ import { SaveLinkSheet } from '../links/SaveLinkSheet';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
+import { openLinkDetail } from '../../utils/navigateLinkDetail';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Home'>,
@@ -167,7 +168,7 @@ export function HomeScreen({ navigation }: Props) {
           <LinkListItem
             link={item}
             onPress={() => {
-              navigation.navigate('LinkDetail', { linkId: item.id });
+              openLinkDetail(navigation, item.id);
             }}
           />
         )}

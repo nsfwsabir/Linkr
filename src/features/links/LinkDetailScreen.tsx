@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, InteractionManager } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -30,14 +30,9 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     return collections.find((col) => col.id === collectionId) ?? collections[0];
   }, [collections, link]);
 
-  // Defer metadata fetch until after the push animation so first paint stays smooth.
-  const [previewEnabled, setPreviewEnabled] = useState(false);
-  useEffect(() => {
-    const handle = InteractionManager.runAfterInteractions(() => setPreviewEnabled(true));
-    return () => handle.cancel?.();
-  }, []);
-
-  const { metadata } = useLinkPreview(previewEnabled ? link?.original_url ?? '' : '');
+  // Preview fetch is async and cached — safe during first paint; no deferred
+  // setState after the push (that re-render was hitching the transition).
+  const { metadata } = useLinkPreview(link?.original_url ?? '');
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);

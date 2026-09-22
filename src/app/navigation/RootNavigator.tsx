@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -79,8 +79,9 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // Lighter than full slide — less jank while detail mounts.
-          animation: 'simple_push',
+          // Fade avoids Android default-slide jank while heavy detail mounts.
+          // simple_push is iOS-only and maps to DEFAULT on Android (jittery).
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'fade',
           autoHideHomeIndicator: true,
         }}
       >

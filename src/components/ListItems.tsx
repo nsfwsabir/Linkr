@@ -47,7 +47,7 @@ function Thumb({ spec }: { spec?: ThumbSpec }) {
   );
 }
 
-export function LinkListItem({
+export const LinkListItem = React.memo(function LinkListItem({
   link,
   onPress,
   showDots = false,
@@ -63,7 +63,7 @@ export function LinkListItem({
       accessibilityRole="button"
       accessibilityLabel={link.title}
       onPress={onPress}
-      hitSlop={6}
+      hitSlop={8}
       style={[styles.row, { gap: v(11), paddingVertical: v(9) }]}
     >
       <Thumb spec={link.thumb} />
@@ -87,7 +87,7 @@ export function LinkListItem({
       </View>
     </Pressable>
   );
-}
+});
 
 export function CollectionCard({
   collection,
