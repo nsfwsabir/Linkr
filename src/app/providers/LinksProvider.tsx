@@ -1,22 +1,35 @@
 import React, { createContext, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 import type { Collection, Link } from '../../types';
-import { mockCollections, mockLinks, mockCollectionLinks, mockUser } from '../../utils/mockData';
+import { mockLinks, mockCollectionLinks, mockCollections, mockUser } from '../../utils/mockData';
 import { enqueueMutation } from '../../features/sync/queue';
-
-type AddLinkInput = {
-  url: string;
-  title: string;
-  description?: string | null;
-  collectionId?: string;
-};
 
 type LinksContextValue = {
   links: Link[];
   collections: Collection[];
+  /** Live per-collection link counts derived from the unified links pool. */
   collectionCounts: Record<string, number>;
   deleteLink: (id: string) => void;
-  addLink: (input: AddLinkInput) => void;
+  addLink: (input: {
+    url: string;
+    title?: string;
+    description?: string | null;
+    collectionId?: string;
+    sourceDomain?: string;
+    previewImageUrl?: string | null;
+  }) => Link;
 };
+
+const seedLinks: Link[] = [...mockLinks, ...mockCollectionLinks];
+
+const LinksContext = createContext<LinksContextValue>({
+  links: seedLinks,
+  collections: mockCollections,
+  collectionCounts: {},
+  deleteLink: () => {},
+  addLink: () => {
+    throw new Error('addLink unavailable outside LinksProvider');
+  },
+});
 
 function countByCollection(links: Link[]): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -28,55 +41,44 @@ function countByCollection(links: Link[]): Record<string, number> {
   return counts;
 }
 
-const LinksContext = createContext<LinksContextValue>({
-  links: mockLinks,
-  collections: mockCollections,
-  collectionCounts: countByCollection([...mockLinks, ...mockCollectionLinks]),
-  deleteLink: () => {},
-  addLink: () => {},
-});
-
 /**
- * Shared link/collection state so Home, Collection View, and Link Detail
- * stay in sync. Mutations enqueue with a client-generated op id (TRD §8).
+ * Shared link + collection state. Every mutation is enqueued with a
+ * client-generated op id for later sync (TRD §8).
  */
 export function LinksProvider({ children }: { children: ReactNode }) {
-  const [links, setLinks] = useState<Link[]>(() => [...mockLinks, ...mockCollectionLinks]);
+  const [links, setLinks] = useState<Link[]>(seedLinks);
   const [collections] = useState<Collection[]>(mockCollections);
+
+  const collectionCounts = useMemo(() => countByCollection(links), [links]);
 
   const deleteLink = useCallback((id: string) => {
     enqueueMutation('delete-link', { id });
     setLinks((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
-  const addLink = useCallback((input: AddLinkInput) => {
-    const collectionId = input.collectionId ?? collections[0]?.id;
-    const now = new Date().toISOString();
-    const link: Link = {
-      id: `l-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      user_id: mockUser.id,
-      canonical_url: input.url,
-      original_url: input.url,
-      title: input.title,
-      description: input.description ?? null,
-      source_domain: (() => {
-        try {
-          return new URL(input.url).hostname.replace(/^www\./, '');
-        } catch {
-          return '';
-        }
-      })(),
-      preview_image_url: null,
-      metadata_status: 'ready',
-      saved_at: 'Just now',
-      updated_at: now,
-      collection_ids: collectionId ? [collectionId] : [],
-    };
-    enqueueMutation('create-link', { id: link.id, url: link.original_url, collection_ids: link.collection_ids });
-    setLinks((prev) => [link, ...prev]);
-  }, [collections]);
-
-  const collectionCounts = useMemo(() => countByCollection(links), [links]);
+  const addLink = useCallback<LinksContextValue['addLink']>(
+    ({ url, title, description, collectionId, sourceDomain, previewImageUrl }) => {
+      const normalized = url.trim();
+      enqueueMutation('create-link', { url: normalized, collectionId });
+      const link: Link = {
+        id: `l-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        user_id: mockUser.id,
+        canonical_url: normalized,
+        original_url: normalized,
+        title: title?.trim() || sourceDomain || normalized,
+        description: description ?? null,
+        source_domain: sourceDomain ?? '',
+        preview_image_url: previewImageUrl ?? null,
+        metadata_status: 'pending',
+        saved_at: 'Just now',
+        updated_at: new Date().toISOString(),
+        collection_ids: collectionId ? [collectionId] : [],
+      };
+      setLinks((prev) => [link, ...prev]);
+      return link;
+    },
+    [],
+  );
 
   const value = useMemo(
     () => ({ links, collections, collectionCounts, deleteLink, addLink }),

@@ -16,21 +16,21 @@ export function CollectionViewScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, collectionCounts } = useLinks();
   const { c } = useTheme();
+
   const collection = collections.find((col) => col.id === route.params.collectionId);
-
   const collectionLinks = useMemo(
-    () => (collection ? links.filter((l) => l.collection_ids?.includes(collection.id)) : []),
-    [links, collection],
+    () => links.filter((l) => l.collection_ids?.includes(route.params.collectionId)),
+    [links, route.params.collectionId],
   );
-
-  const notFound = !collection;
-  const theme = notFound ? themesFor(c).pink : themesFor(c)[collection.color_key];
-  const iconBtn = v(32);
   const count = collection ? (collectionCounts[collection.id] ?? 0) : 0;
+  const iconBtn = v(32);
 
-  if (notFound) {
+  if (!collection) {
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
+      <SafeAreaView
+        edges={['top', 'bottom']}
+        style={[styles.container, { backgroundColor: c.screenBg }]}
+      >
         <View
           style={[
             styles.navHeader,
@@ -46,12 +46,14 @@ export function CollectionViewScreen({ route, navigation }: Props) {
             <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
           </Pressable>
         </View>
-        <Text style={[styles.empty, { marginTop: v(32), paddingHorizontal: v(22), color: c.textTertiary }]}>
+        <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
           Collection not found.
         </Text>
       </SafeAreaView>
     );
   }
+
+  const theme = themesFor(c)[collection.color_key];
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>

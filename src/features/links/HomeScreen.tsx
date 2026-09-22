@@ -20,7 +20,7 @@ type Props = CompositeScreenProps<
 >;
 
 const ALL = 'all';
-const QUICK_VISIBLE = 3;
+const QUICK_COLLECTION_LIMIT = 3;
 
 export function HomeScreen({ navigation }: Props) {
   const v = useRefScale();
@@ -30,9 +30,10 @@ export function HomeScreen({ navigation }: Props) {
   const [filterId, setFilterId] = useState<string>(ALL);
   const [sheetVisible, setSheetVisible] = useState(false);
 
-  const quickCollections = useMemo(() => collections.slice(0, QUICK_VISIBLE), [collections]);
-  const hasMoreCollections = collections.length > QUICK_VISIBLE;
+  const quickCollections = useMemo(() => collections.slice(0, QUICK_COLLECTION_LIMIT), [collections]);
+  const hasMoreCollections = collections.length > QUICK_COLLECTION_LIMIT;
 
+  // Reset an invalid filter if the collection was deleted or reshaped.
   useEffect(() => {
     if (filterId !== ALL && !collections.some((col) => col.id === filterId)) {
       setFilterId(ALL);
@@ -58,37 +59,35 @@ export function HomeScreen({ navigation }: Props) {
     return 'No links yet. Tap + to save one.';
   }, [query, filterId, collections]);
 
-  const renderPill = (
-    key: string,
-    label: string,
-    selected: boolean,
-    onPress: () => void,
-  ) => (
-    <Pressable
-      key={key}
-      accessibilityRole="tab"
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      style={[
-        styles.tab,
-        {
-          paddingVertical: v(5),
-          paddingHorizontal: v(8),
-          borderRadius: v(20),
-          backgroundColor: selected ? c.dark : c.inputBg,
-        },
-      ]}
-    >
-      <Text
+  const renderPill = (key: string, label: string, onPress: () => void) => {
+    const selected = filterId === key;
+    return (
+      <Pressable
+        key={key}
+        accessibilityRole="tab"
+        accessibilityState={{ selected }}
+        onPress={onPress}
         style={[
-          styles.tabText,
-          { fontSize: v(10), color: selected ? '#fff' : c.textSecondary },
+          styles.tab,
+          {
+            paddingVertical: v(5),
+            paddingHorizontal: v(8),
+            borderRadius: v(20),
+            backgroundColor: selected ? c.dark : c.inputBg,
+          },
         ]}
       >
-        {label}
-      </Text>
-    </Pressable>
-  );
+        <Text
+          style={[
+            styles.tabText,
+            { fontSize: v(10), color: selected ? '#fff' : c.textSecondary },
+          ]}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    );
+  };
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: c.screenBg }]}>
@@ -101,21 +100,17 @@ export function HomeScreen({ navigation }: Props) {
         }
       />
       <SearchBar value={query} onChangeText={setQuery} />
-      <View style={[styles.tabsWrap, { marginHorizontal: v(20), marginBottom: v(10) }]}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: v(4) }}
-        >
-          {renderPill('all', 'All', filterId === ALL, () => setFilterId(ALL))}
-          {quickCollections.map((col) =>
-            renderPill(col.id, col.name, filterId === col.id, () => setFilterId(col.id)),
-          )}
-          {hasMoreCollections
-            ? renderPill('more', 'More', false, () => navigation.navigate('Collections'))
-            : null}
-        </ScrollView>
-      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[styles.tabs, { gap: v(4), marginHorizontal: v(20), marginBottom: v(10) }]}
+      >
+        {renderPill(ALL, 'All', () => setFilterId(ALL))}
+        {quickCollections.map((col) => renderPill(col.id, col.name, () => setFilterId(col.id)))}
+        {hasMoreCollections
+          ? renderPill('more', 'More', () => navigation.navigate('Collections'))
+          : null}
+      </ScrollView>
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -136,8 +131,7 @@ export function HomeScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  tabsWrap: {},
-  tabs: { flexDirection: 'row' },
+  tabs: { flexDirection: 'row', alignItems: 'center' },
   tab: {},
   tabText: { fontWeight: '600' },
   list: {},

@@ -144,7 +144,7 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
       >
         <Icon name="folder" size={v(16)} color={colors.blue} />
         <Text style={[styles.dropdownText, { fontSize: v(13), color: c.textPrimary }]}>
-          {collection}
+          {selectedCollection?.name ?? 'No collection'}
         </Text>
         <Icon name="chevronDown" size={v(15)} color={c.textTertiary} />
       </View>
@@ -154,7 +154,7 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
       <PrimaryButton title="Save" onPress={handleSave} />
       {/* Collection options mirror HTML source; picker UI deferred to keep sheet faithful */}
       <Text style={styles.hidden} accessibilityElementsHidden>
-        {collection}
+        {selectedCollection?.name ?? ''}
       </Text>
     </BottomSheet>
   );

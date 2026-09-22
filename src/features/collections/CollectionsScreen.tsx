@@ -23,11 +23,7 @@ export function CollectionsScreen({ navigation }: Props) {
   const { collections, collectionCounts } = useLinks();
 
   const data = useMemo(
-    () =>
-      collections.map((col) => ({
-        ...col,
-        link_count: collectionCounts[col.id] ?? 0,
-      })),
+    () => collections.map((col) => ({ ...col, link_count: collectionCounts[col.id] ?? 0 })),
     [collections, collectionCounts],
   );
 
