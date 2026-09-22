@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { PrimaryButton, OutlineButton } from '../../components/Buttons';
@@ -19,7 +20,13 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
 export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, deleteLink, setLinkCollection } = useLinks();
-  const { c } = useTheme();
+  const { c, dark } = useTheme();
+  // Same translucent glass as BottomNav pill (blur on iOS; solid rgba on Android).
+  const glassBg = {
+    borderRadius: 999,
+    backgroundColor: dark ? 'rgba(30,33,38,0.92)' : 'rgba(255,255,255,0.96)',
+    borderColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.9)',
+  } as const;
   // Params can be missing if the native stack restores state oddly — never throw.
   const linkId = route.params?.linkId;
   const link = linkId ? links.find((l) => l.id === linkId) : undefined;
@@ -118,21 +125,53 @@ export function LinkDetailScreen({ route, navigation }: Props) {
         />
         <View style={[styles.floating, { paddingTop: v(52), paddingHorizontal: v(18) }]}>
           <Pressable
-            style={[styles.fab, { width: fab, height: fab, borderRadius: fab / 2 }]}
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={() => navigation.goBack()}
+            style={({ pressed }) => [
+              styles.fab,
+              { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
+            ]}
           >
-            {/* FAB stays white in both themes; icon uses static light-theme ink. */}
-            <Icon name="arrowLeft" size={v(17)} color={colors.textPrimary} />
+            {/* Glass FAB matches BottomNav translucency: blur on iOS, solid rgba on Android. */}
+            {Platform.OS === 'ios' ? (
+              <BlurView
+                intensity={dark ? 45 : 65}
+                tint={dark ? 'dark' : 'light'}
+                experimentalBlurMethod="dimezisBlurView"
+                style={[styles.fabGlass, glassBg]}
+              >
+                <Icon name="arrowLeft" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
+              </BlurView>
+            ) : (
+              <View style={[styles.fabGlass, glassBg]}>
+                <Icon name="arrowLeft" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
+              </View>
+            )}
           </Pressable>
           <Pressable
-            style={[styles.fab, { width: fab, height: fab, borderRadius: fab / 2 }]}
             accessibilityRole="button"
             accessibilityLabel="More actions"
             onPress={() => setActionsVisible(true)}
+            style={({ pressed }) => [
+              styles.fab,
+              { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
+            ]}
           >
-            <Icon name="dots" size={v(17)} color={colors.textPrimary} />
+            {Platform.OS === 'ios' ? (
+              <BlurView
+                intensity={dark ? 45 : 65}
+                tint={dark ? 'dark' : 'light'}
+                experimentalBlurMethod="dimezisBlurView"
+                style={[styles.fabGlass, glassBg]}
+              >
+                <Icon name="dots" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
+              </BlurView>
+            ) : (
+              <View style={[styles.fabGlass, glassBg]}>
+                <Icon name="dots" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
+              </View>
+            )}
           </Pressable>
         </View>
       </LinearGradient>
@@ -323,7 +362,6 @@ const styles = StyleSheet.create({
   heroGlow: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.14)' },
   floating: { flexDirection: 'row', justifyContent: 'space-between' },
   fab: {
-    backgroundColor: 'rgba(255,255,255,0.88)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -331,6 +369,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
+  },
+  fabGlass: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
   },
   body: { flex: 1 },
   title: { fontWeight: '800' },
