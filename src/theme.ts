@@ -6,11 +6,14 @@ export const colors = {
   boardBg: '#c7ccd6',
   screenBg: '#f7f8fa',
   screenBgAlt: '#eef0f4',
+  screenBgDark: '#14161a',
   textPrimary: '#14161a',
   textSecondary: '#888d96',
   textTertiary: '#b3b7bf',
   border: '#eaebee',
+  borderDark: '#3a3f47',
   inputBg: '#f2f3f5',
+  inputBgDark: '#1e2126',
   blue: '#2f6fed',
   blueBg: '#e3ebfd',
   pink: '#f2436a',
@@ -23,6 +26,8 @@ export const colors = {
   white: '#ffffff',
   signoutBg: '#fdeaed',
   signoutText: '#e63757',
+  signoutBgDark: '#3a1a24',
+  signoutTextDark: '#fda4af',
   overlay: 'rgba(10,12,20,0.5)',
 } as const;
 
