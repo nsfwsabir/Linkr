@@ -67,7 +67,7 @@ export function LinkListItem({
       style={[styles.row, { gap: v(11), paddingVertical: v(9) }]}
     >
       <Thumb spec={link.thumb} />
-      <View style={styles.textWrap}>
+      <View style={styles.textWrap} pointerEvents="none">
         <Text numberOfLines={1} style={[styles.title, { fontSize: v(12.8), color: c.textPrimary }]}>
           {link.title}
         </Text>
@@ -76,17 +76,15 @@ export function LinkListItem({
           {showDots ? ` · ${link.saved_at}` : ''}
         </Text>
       </View>
-      {showDots ? (
-        <View style={[styles.dots, { marginLeft: v(4) }]} pointerEvents="none">
+      <View style={styles.trailing} pointerEvents="none">
+        {showDots ? (
           <Icon name="dots" size={v(16)} color={c.textTertiary} />
-        </View>
-      ) : (
-        <Text
-          style={[styles.time, { fontSize: v(10.5), marginLeft: v(4), color: c.textTertiary }]}
-        >
-          {link.saved_at}
-        </Text>
-      )}
+        ) : (
+          <Text style={[styles.time, { fontSize: v(10.5), color: c.textTertiary }]}>
+            {link.saved_at}
+          </Text>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -156,6 +154,7 @@ const styles = StyleSheet.create({
   title: { fontWeight: '700' },
   meta: {},
   time: {},
+  trailing: { marginLeft: 4, alignItems: 'flex-end' },
   dots: {},
   card: {
     flexDirection: 'row',

@@ -74,7 +74,16 @@ export function RootNavigator() {
   }
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          // Match screen bg so the native window never flashes white mid-push.
+          contentStyle: { backgroundColor: c.screenBg },
+          // Lighter than full slide — less jank while detail mounts.
+          animation: 'simple_push',
+          autoHideHomeIndicator: true,
+        }}
+      >
         {session ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />

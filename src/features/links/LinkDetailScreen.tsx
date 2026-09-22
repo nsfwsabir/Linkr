@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, InteractionManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -20,7 +20,9 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, deleteLink, setLinkCollection } = useLinks();
   const { c } = useTheme();
-  const link = links.find((l) => l.id === route.params.linkId);
+  // Params can be missing if the native stack restores state oddly — never throw.
+  const linkId = route.params?.linkId;
+  const link = linkId ? links.find((l) => l.id === linkId) : undefined;
 
   const collection = useMemo(() => {
     const collectionId = link?.collection_ids?.[0];
@@ -28,7 +30,14 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     return collections.find((col) => col.id === collectionId) ?? collections[0];
   }, [collections, link]);
 
-  const { metadata } = useLinkPreview(link?.original_url ?? '');
+  // Defer metadata fetch until after the push animation so first paint stays smooth.
+  const [previewEnabled, setPreviewEnabled] = useState(false);
+  useEffect(() => {
+    const handle = InteractionManager.runAfterInteractions(() => setPreviewEnabled(true));
+    return () => handle.cancel?.();
+  }, []);
+
+  const { metadata } = useLinkPreview(previewEnabled ? link?.original_url ?? '' : '');
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -38,10 +47,20 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     setFaviconFailed(false);
   }, [link?.id]);
 
-  if (!link) {
+  if (!linkId || !link) {
     return (
       <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
-        <Text style={[styles.emptyFallback, { color: c.textTertiary }]}>Link not found.</Text>
+        <Text style={[styles.emptyFallback, { color: c.textSecondary }]}>
+          {linkId ? 'Link not found.' : 'This link is no longer available.'}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={() => navigation.goBack()}
+          style={[styles.emptyBack, { marginTop: v(16), borderColor: c.border, backgroundColor: c.cardBg }]}
+        >
+          <Text style={[styles.emptyBackText, { fontSize: v(13.5), color: c.textPrimary }]}>Go back</Text>
+        </Pressable>
       </SafeAreaView>
     );
   }
@@ -197,103 +216,107 @@ export function LinkDetailScreen({ route, navigation }: Props) {
         </Pressable>
       </View>
 
-      <BottomSheet
-        visible={collectionPickerVisible}
-        title="Add to collection"
-        onClose={() => setCollectionPickerVisible(false)}
-      >
-        {collections.map((col) => {
-          const selected = col.id === collection?.id;
-          const t = theme[col.color_key];
-          return (
-            <Pressable
-              key={col.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              accessibilityLabel={col.name}
-              onPress={() => pickCollection(col.id)}
-              style={[
-                styles.pickRow,
-                {
-                  gap: v(12),
-                  paddingVertical: v(11),
-                  paddingHorizontal: v(12),
-                  borderRadius: v(14),
-                  marginBottom: v(8),
-                  backgroundColor: selected ? t.bg : c.inputBg,
-                },
-              ]}
-            >
-              <View style={[styles.pickIcon, { backgroundColor: t.bg, width: v(32), height: v(32), borderRadius: v(10) }]}>
-                <Icon name="folder" size={v(15)} color={t.fg} />
-              </View>
-              <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
-                {col.name}
-              </Text>
-              {selected ? <Icon name="chevronRight" size={v(15)} color={t.fg} /> : null}
-            </Pressable>
-          );
-        })}
-      </BottomSheet>
+      {collectionPickerVisible ? (
+        <BottomSheet
+          visible
+          title="Add to collection"
+          onClose={() => setCollectionPickerVisible(false)}
+        >
+          {collections.map((col) => {
+            const selected = col.id === collection?.id;
+            const t = theme[col.color_key];
+            return (
+              <Pressable
+                key={col.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={col.name}
+                onPress={() => pickCollection(col.id)}
+                style={[
+                  styles.pickRow,
+                  {
+                    gap: v(12),
+                    paddingVertical: v(11),
+                    paddingHorizontal: v(12),
+                    borderRadius: v(14),
+                    marginBottom: v(8),
+                    backgroundColor: selected ? t.bg : c.inputBg,
+                  },
+                ]}
+              >
+                <View style={[styles.pickIcon, { backgroundColor: t.bg, width: v(32), height: v(32), borderRadius: v(10) }]}>
+                  <Icon name="folder" size={v(15)} color={t.fg} />
+                </View>
+                <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
+                  {col.name}
+                </Text>
+                {selected ? <Icon name="chevronRight" size={v(15)} color={t.fg} /> : null}
+              </Pressable>
+            );
+          })}
+        </BottomSheet>
+      ) : null}
 
-      <BottomSheet
-        visible={actionsVisible}
-        title={confirming ? 'Delete link?' : 'Link actions'}
-        onClose={closeActions}
-      >
-        {confirming ? (
-          <View>
-            <Text
-              style={[
-                styles.confirmText,
-                { fontSize: v(13), lineHeight: v(20), marginBottom: v(16), color: c.textSecondary },
-              ]}
-            >
-              “{link.title}” will be removed from your saved links. This cannot be undone.
-            </Text>
+      {actionsVisible ? (
+        <BottomSheet
+          visible
+          title={confirming ? 'Delete link?' : 'Link actions'}
+          onClose={closeActions}
+        >
+          {confirming ? (
+            <View>
+              <Text
+                style={[
+                  styles.confirmText,
+                  { fontSize: v(13), lineHeight: v(20), marginBottom: v(16), color: c.textSecondary },
+                ]}
+              >
+                “{link.title}” will be removed from your saved links. This cannot be undone.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Confirm delete link"
+                onPress={handleDelete}
+                style={[
+                  styles.destructive,
+                  {
+                    height: v(46),
+                    borderRadius: v(14),
+                    marginBottom: v(10),
+                    backgroundColor: c.signoutBg,
+                  },
+                ]}
+              >
+                <Text style={[styles.destructiveText, { fontSize: v(13.5), color: c.signoutText }]}>
+                  Delete
+                </Text>
+              </Pressable>
+              <OutlineButton title="Cancel" onPress={() => setConfirming(false)} />
+            </View>
+          ) : (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Confirm delete link"
-              onPress={handleDelete}
+              accessibilityLabel="Delete link"
+              onPress={() => setConfirming(true)}
               style={[
-                styles.destructive,
+                styles.deleteRow,
                 {
+                  gap: v(10),
                   height: v(46),
                   borderRadius: v(14),
-                  marginBottom: v(10),
+                  paddingHorizontal: v(14),
                   backgroundColor: c.signoutBg,
                 },
               ]}
             >
-              <Text style={[styles.destructiveText, { fontSize: v(13.5), color: c.signoutText }]}>
-                Delete
+              <Icon name="trash" size={v(16)} color={c.signoutText} />
+              <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.signoutText }]}>
+                Delete link
               </Text>
             </Pressable>
-            <OutlineButton title="Cancel" onPress={() => setConfirming(false)} />
-          </View>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Delete link"
-            onPress={() => setConfirming(true)}
-            style={[
-              styles.deleteRow,
-              {
-                gap: v(10),
-                height: v(46),
-                borderRadius: v(14),
-                paddingHorizontal: v(14),
-                backgroundColor: c.signoutBg,
-              },
-            ]}
-          >
-            <Icon name="trash" size={v(16)} color={c.signoutText} />
-            <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.signoutText }]}>
-              Delete link
-            </Text>
-          </Pressable>
-        )}
-      </BottomSheet>
+          )}
+        </BottomSheet>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -344,4 +367,13 @@ const styles = StyleSheet.create({
   },
   destructiveText: { fontWeight: '700' },
   emptyFallback: { marginTop: 40, textAlign: 'center', fontSize: 13 },
+  emptyBack: {
+    alignSelf: 'center',
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  emptyBackText: { fontWeight: '700' },
 });
