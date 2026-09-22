@@ -51,7 +51,7 @@ export function ProfileScreen({ navigation }: Props) {
   return (
     <SafeAreaView
       edges={['top']}
-      style={[styles.container, { backgroundColor: c.screenBg }]}
+      style={[styles.container, { backgroundColor: c.screenBg, paddingBottom: v(96) }]}
     >
       <AppHeader title="Settings" />
       <View

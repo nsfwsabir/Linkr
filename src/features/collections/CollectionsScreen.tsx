@@ -33,7 +33,7 @@ export function CollectionsScreen({ navigation }: Props) {
       <FlatList
         data={mockCollections}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.list, { paddingHorizontal: v(20), paddingBottom: v(16) }]}
+        contentContainerStyle={[styles.list, { paddingHorizontal: v(20), paddingBottom: v(96) }]}
         renderItem={({ item }) => (
           <CollectionCard
             collection={item}

@@ -81,7 +81,7 @@ export function HomeScreen({ navigation }: Props) {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.list, { paddingHorizontal: v(22), paddingBottom: v(16) }]}
+        contentContainerStyle={[styles.list, { paddingHorizontal: v(22), paddingBottom: v(96) }]}
         ListEmptyComponent={
           <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
             No links yet. Tap + to save one.

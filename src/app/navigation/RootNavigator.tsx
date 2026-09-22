@@ -18,7 +18,6 @@ import { HomeScreen } from '../../features/links/HomeScreen';
 import { CollectionsScreen } from '../../features/collections/CollectionsScreen';
 import { CollectionViewScreen } from '../../features/collections/CollectionViewScreen';
 import { LinkDetailScreen } from '../../features/links/LinkDetailScreen';
-import { SearchScreen } from '../../features/search/SearchScreen';
 import { ProfileScreen } from '../../features/profile/ProfileScreen';
 import { EditProfileScreen } from '../../features/profile/EditProfileScreen';
 
@@ -36,7 +35,6 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Collections: undefined;
-  Search: undefined;
   Settings: undefined;
 };
 
@@ -52,7 +50,6 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Collections" component={CollectionsScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Settings" component={ProfileScreen} />
     </Tab.Navigator>
   );
