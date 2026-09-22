@@ -5,7 +5,7 @@ import { Icon } from '../../components/Icon';
 import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { useLinkPreview } from './useLinkPreview';
-import { isValidUrl, extractDomain, faviconUrl } from '../../utils/url';
+import { isValidUrl, faviconUrl } from '../../utils/url';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
@@ -19,13 +19,12 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
   const { collections, addLink } = useLinks();
   const [url, setUrl] = useState('https://example.com');
   const [debouncedUrl, setDebouncedUrl] = useState(url);
-  const [collectionId, setCollectionId] = useState(() => collections[0]?.id ?? '');
+  const [collectionId, setCollectionId] = useState(collections[0]?.id ?? '');
   const [error, setError] = useState<string | null>(null);
   const [thumbFailed, setThumbFailed] = useState(false);
-  const collection = collections.find((col) => col.id === collectionId)?.name ?? 'Read Later';
 
   const valid = isValidUrl(url);
-  const domain = valid ? extractDomain(url) : '';
+  const domain = valid ? url.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '').replace(/^www\./i, '') : '';
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -39,6 +38,9 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
     valid && isValidUrl(debouncedUrl) ? debouncedUrl.trim() : '',
   );
 
+  const selectedCollection =
+    collections.find((col) => col.id === collectionId) ?? collections[0];
+
   const handleSave = () => {
     if (!valid) {
       setError('The URL is not valid.');
@@ -47,9 +49,9 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
     setError(null);
     addLink({
       url: url.trim(),
-      title: liveTitle ?? (domain ? domain : 'Untitled link'),
-      description: liveDesc,
-      collectionId,
+      title: metadata?.title ?? undefined,
+      description: metadata?.description ?? null,
+      collectionId: selectedCollection?.id,
     });
     onClose();
   };
@@ -58,7 +60,6 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
   const liveDesc = metadata?.description;
   const bannerUri = metadata?.preview_image_url ?? null;
   const iconUri = !thumbFailed && domain ? faviconUrl(domain, 64) : null;
-  // Prefer the page banner; fall back to the site icon; last resort is the placeholder glyph.
   const thumbUri = bannerUri ?? iconUri;
   const thumb = v(44);
 
@@ -144,7 +145,7 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
       >
         <Icon name="folder" size={v(16)} color={colors.blue} />
         <Text style={[styles.dropdownText, { fontSize: v(13), color: c.textPrimary }]}>
-          {selectedCollection?.name ?? 'No collection'}
+          {selectedCollection?.name ?? 'Read Later'}
         </Text>
         <Icon name="chevronDown" size={v(15)} color={c.textTertiary} />
       </View>
@@ -152,7 +153,6 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
         <Text style={[styles.error, { fontSize: v(12), marginBottom: v(8) }]}>{error}</Text>
       ) : null}
       <PrimaryButton title="Save" onPress={handleSave} />
-      {/* Collection options mirror HTML source; picker UI deferred to keep sheet faithful */}
       <Text style={styles.hidden} accessibilityElementsHidden>
         {selectedCollection?.name ?? ''}
       </Text>

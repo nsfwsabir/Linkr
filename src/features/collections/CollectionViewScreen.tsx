@@ -18,19 +18,18 @@ export function CollectionViewScreen({ route, navigation }: Props) {
   const { c } = useTheme();
 
   const collection = collections.find((col) => col.id === route.params.collectionId);
+
   const collectionLinks = useMemo(
-    () => links.filter((l) => l.collection_ids?.includes(route.params.collectionId)),
-    [links, route.params.collectionId],
+    () =>
+      collection
+        ? links.filter((l) => l.collection_ids?.includes(collection.id))
+        : [],
+    [links, collection],
   );
-  const count = collection ? (collectionCounts[collection.id] ?? 0) : 0;
-  const iconBtn = v(32);
 
   if (!collection) {
     return (
-      <SafeAreaView
-        edges={['top', 'bottom']}
-        style={[styles.container, { backgroundColor: c.screenBg }]}
-      >
+      <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
         <View
           style={[
             styles.navHeader,
@@ -41,7 +40,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={() => navigation.goBack()}
-            style={[styles.iconBtn, { width: iconBtn, height: iconBtn }]}
+            style={[styles.iconBtn, { width: v(32), height: v(32) }]}
           >
             <Icon name="arrowLeft" size={v(17)} color={c.textPrimary} />
           </Pressable>
@@ -54,6 +53,8 @@ export function CollectionViewScreen({ route, navigation }: Props) {
   }
 
   const theme = themesFor(c)[collection.color_key];
+  const iconBtn = v(32);
+  const count = collectionCounts[collection.id] ?? 0;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Linking, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,17 +21,28 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const { links, collections, deleteLink } = useLinks();
   const { c } = useTheme();
   const link = links.find((l) => l.id === route.params.linkId);
-  const collection = link
-    ? collections.find((col) => link.collection_ids?.includes(col.id))
-    : undefined;
-  const { metadata } = useLinkPreview(link.original_url);
+
+  const collection = useMemo(() => {
+    if (!link?.collection_ids?.length) return collections[0];
+    return collections.find((col) => col.id === link.collection_ids[0]) ?? collections[0];
+  }, [collections, link]);
+
+  const { metadata } = useLinkPreview(link?.original_url ?? '');
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     setFaviconFailed(false);
-  }, [link.id]);
+  }, [link?.id]);
+
+  if (!link) {
+    return (
+      <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: c.screenBg }]}>
+        <Text style={[styles.emptyFallback, { color: c.textTertiary }]}>Link not found.</Text>
+      </SafeAreaView>
+    );
+  }
 
   const bannerUri = link.preview_image_url ?? metadata?.preview_image_url ?? null;
   const iconUri = faviconFailed ? null : faviconUrl(link.source_domain);
@@ -154,7 +165,8 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           <View>
             <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>Saved</Text>
             <Text style={[styles.sub, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
-              {link.saved_at}{collection ? ` · ${collection.name}` : ''}
+              {link.saved_at}
+              {collection ? ` · ${collection.name}` : ''}
             </Text>
           </View>
           <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
@@ -275,4 +287,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   destructiveText: { fontWeight: '700' },
+  emptyFallback: { marginTop: 40, textAlign: 'center', fontSize: 13 },
 });

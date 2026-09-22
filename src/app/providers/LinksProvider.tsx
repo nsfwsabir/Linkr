@@ -1,35 +1,18 @@
 import React, { createContext, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 import type { Collection, Link } from '../../types';
-import { mockLinks, mockCollectionLinks, mockCollections, mockUser } from '../../utils/mockData';
+import { mockCollections, mockLinks, mockCollectionLinks } from '../../utils/mockData';
 import { enqueueMutation } from '../../features/sync/queue';
+import { extractDomain } from '../../utils/url';
 
 type LinksContextValue = {
   links: Link[];
   collections: Collection[];
-  /** Live per-collection link counts derived from the unified links pool. */
   collectionCounts: Record<string, number>;
+  addLink: (input: { url: string; title?: string; description?: string | null; collectionId?: string }) => void;
   deleteLink: (id: string) => void;
-  addLink: (input: {
-    url: string;
-    title?: string;
-    description?: string | null;
-    collectionId?: string;
-    sourceDomain?: string;
-    previewImageUrl?: string | null;
-  }) => Link;
 };
 
 const seedLinks: Link[] = [...mockLinks, ...mockCollectionLinks];
-
-const LinksContext = createContext<LinksContextValue>({
-  links: seedLinks,
-  collections: mockCollections,
-  collectionCounts: {},
-  deleteLink: () => {},
-  addLink: () => {
-    throw new Error('addLink unavailable outside LinksProvider');
-  },
-});
 
 function countByCollection(links: Link[]): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -41,48 +24,57 @@ function countByCollection(links: Link[]): Record<string, number> {
   return counts;
 }
 
+const LinksContext = createContext<LinksContextValue>({
+  links: seedLinks,
+  collections: mockCollections,
+  collectionCounts: {},
+  addLink: () => {},
+  deleteLink: () => {},
+});
+
 /**
- * Shared link + collection state. Every mutation is enqueued with a
- * client-generated op id for later sync (TRD §8).
+ * Shared link + collection state so Home filters, Collection View, Link Detail,
+ * and Save Link all read from the same source. Counts are derived from links.
  */
 export function LinksProvider({ children }: { children: ReactNode }) {
   const [links, setLinks] = useState<Link[]>(seedLinks);
-  const [collections] = useState<Collection[]>(mockCollections);
-
   const collectionCounts = useMemo(() => countByCollection(links), [links]);
+
+  const addLink = useCallback(
+    (input: { url: string; title?: string; description?: string | null; collectionId?: string }) => {
+      const now = new Date().toISOString();
+      const link: Link = {
+        id: `local-${Date.now()}`,
+        user_id: mockCollections[0]?.user_id ?? '',
+        canonical_url: input.url,
+        original_url: input.url,
+        title: input.title ?? input.url,
+        description: input.description ?? null,
+        source_domain: extractDomain(input.url),
+        preview_image_url: null,
+        metadata_status: 'pending',
+        saved_at: 'Just now',
+        updated_at: now,
+        collection_ids: input.collectionId ? [input.collectionId] : [],
+      };
+      enqueueMutation('create-link', {
+        url: link.original_url,
+        title: link.title,
+        collectionId: input.collectionId,
+      });
+      setLinks((prev) => [link, ...prev]);
+    },
+    [],
+  );
 
   const deleteLink = useCallback((id: string) => {
     enqueueMutation('delete-link', { id });
     setLinks((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
-  const addLink = useCallback<LinksContextValue['addLink']>(
-    ({ url, title, description, collectionId, sourceDomain, previewImageUrl }) => {
-      const normalized = url.trim();
-      enqueueMutation('create-link', { url: normalized, collectionId });
-      const link: Link = {
-        id: `l-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user_id: mockUser.id,
-        canonical_url: normalized,
-        original_url: normalized,
-        title: title?.trim() || sourceDomain || normalized,
-        description: description ?? null,
-        source_domain: sourceDomain ?? '',
-        preview_image_url: previewImageUrl ?? null,
-        metadata_status: 'pending',
-        saved_at: 'Just now',
-        updated_at: new Date().toISOString(),
-        collection_ids: collectionId ? [collectionId] : [],
-      };
-      setLinks((prev) => [link, ...prev]);
-      return link;
-    },
-    [],
-  );
-
   const value = useMemo(
-    () => ({ links, collections, collectionCounts, deleteLink, addLink }),
-    [links, collections, collectionCounts, deleteLink, addLink],
+    () => ({ links, collections: mockCollections, collectionCounts, addLink, deleteLink }),
+    [links, collectionCounts, addLink, deleteLink],
   );
 
   return <LinksContext.Provider value={value}>{children}</LinksContext.Provider>;
