@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
-import { mockLinks, mockCollections } from '../../utils/mockData';
-import { PrimaryButton } from '../../components/Buttons';
+import { mockCollections, mockLinks } from '../../utils/mockData';
+import { PrimaryButton, OutlineButton } from '../../components/Buttons';
 import { Icon } from '../../components/Icon';
+import { BottomSheet } from '../../components/BottomSheet';
 import { useLinkPreview } from './useLinkPreview';
 import { faviconUrl } from '../../utils/url';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
@@ -16,13 +18,18 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
 
 export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
+  const { links, collectionLinks, deleteLink } = useLinks();
   const link =
-    mockLinks.find((l) => l.id === route.params.linkId) ??
-    mockLinks.find((l) => l.id === 'l-sleep') ??
+    links.find((l) => l.id === route.params.linkId) ??
+    collectionLinks.find((l) => l.id === route.params.linkId) ??
+    links.find((l) => l.id === 'l-sleep') ??
+    collectionLinks[0] ??
     mockLinks[0];
   const collection = mockCollections[0];
   const { metadata } = useLinkPreview(link.original_url);
   const [faviconFailed, setFaviconFailed] = useState(false);
+  const [actionsVisible, setActionsVisible] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     setFaviconFailed(false);
@@ -32,6 +39,17 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const iconUri = faviconFailed ? null : faviconUrl(link.source_domain);
   const description = link.description ?? metadata?.description ?? '';
   const fab = v(32);
+
+  const closeActions = () => {
+    setActionsVisible(false);
+    setConfirming(false);
+  };
+
+  const handleDelete = () => {
+    deleteLink(link.id);
+    closeActions();
+    navigation.goBack();
+  };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
@@ -70,6 +88,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             style={[styles.fab, { width: fab, height: fab, borderRadius: fab / 2 }]}
             accessibilityRole="button"
             accessibilityLabel="More actions"
+            onPress={() => setActionsVisible(true)}
           >
             <Icon name="dots" size={v(17)} color={colors.textPrimary} />
           </Pressable>
@@ -118,6 +137,45 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
         </View>
       </View>
+
+      <BottomSheet
+        visible={actionsVisible}
+        title={confirming ? 'Delete link?' : 'Link actions'}
+        onClose={closeActions}
+      >
+        {confirming ? (
+          <View>
+            <Text style={[styles.confirmText, { fontSize: v(13), lineHeight: v(20), marginBottom: v(16) }]}>
+              “{link.title}” will be removed from your saved links. This cannot be undone.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Confirm delete link"
+              onPress={handleDelete}
+              style={[
+                styles.destructive,
+                { height: v(46), borderRadius: v(14), marginBottom: v(10) },
+              ]}
+            >
+              <Text style={[styles.destructiveText, { fontSize: v(13.5) }]}>Delete</Text>
+            </Pressable>
+            <OutlineButton title="Cancel" onPress={() => setConfirming(false)} />
+          </View>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Delete link"
+            onPress={() => setConfirming(true)}
+            style={[
+              styles.deleteRow,
+              { gap: v(10), height: v(46), borderRadius: v(14), paddingHorizontal: v(14) },
+            ]}
+          >
+            <Icon name="trash" size={v(16)} color={colors.signoutText} />
+            <Text style={[styles.deleteRowText, { fontSize: v(13.5) }]}>Delete link</Text>
+          </Pressable>
+        )}
+      </BottomSheet>
     </SafeAreaView>
   );
 
@@ -164,4 +222,17 @@ const styles = StyleSheet.create({
   },
   rowText: { fontWeight: '600', color: colors.textPrimary },
   sub: { fontWeight: '500', color: colors.textTertiary },
+  confirmText: { color: colors.textSecondary },
+  deleteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.signoutBg,
+  },
+  deleteRowText: { fontWeight: '700', color: colors.signoutText },
+  destructive: {
+    backgroundColor: colors.signoutBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  destructiveText: { fontWeight: '700', color: colors.signoutText },
 });

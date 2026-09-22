@@ -4,24 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { AppHeader } from '../../components/AppHeader';
-import { mockLinks } from '../../utils/mockData';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 export function SearchScreen() {
   const v = useRefScale();
+  const { links } = useLinks();
   const [query, setQuery] = useState('');
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return mockLinks;
-    return mockLinks.filter(
+    if (!q) return links;
+    return links.filter(
       (l) =>
         l.title.toLowerCase().includes(q) ||
         l.source_domain.toLowerCase().includes(q) ||
         (l.description ?? '').toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, links]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>

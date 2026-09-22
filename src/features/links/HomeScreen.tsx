@@ -10,7 +10,7 @@ import { Icon } from '../../components/Icon';
 import { SearchBar } from '../../components/Inputs';
 import { LinkListItem } from '../../components/ListItems';
 import { SaveLinkSheet } from '../links/SaveLinkSheet';
-import { mockLinks } from '../../utils/mockData';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
@@ -23,19 +23,20 @@ const TABS = ['All', 'Read Later', 'Work', 'Personal'];
 
 export function HomeScreen({ navigation }: Props) {
   const v = useRefScale();
+  const { links } = useLinks();
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState('All');
   const [sheetVisible, setSheetVisible] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return mockLinks.filter((l) => {
+    return links.filter((l) => {
       const matchesQuery =
         !q || l.title.toLowerCase().includes(q) || l.source_domain.toLowerCase().includes(q);
       const matchesTab = tab === 'All' || l.collection_ids?.includes(tabToCollectionId(tab));
       return matchesQuery && matchesTab;
     });
-  }, [query, tab]);
+  }, [query, tab, links]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>

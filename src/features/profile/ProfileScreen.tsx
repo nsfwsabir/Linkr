@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { CompositeScreenProps } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MainTabParamList, RootStackParamList } from '../../app/navigation/RootNavigator';
 import { AppHeader } from '../../components/AppHeader';
 import { Icon, IconName } from '../../components/Icon';
 import { useAuth } from '../../app/providers/AuthProvider';
@@ -8,21 +12,34 @@ import { mockUser } from '../../utils/mockData';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
-const ROWS: { label: string; icon: IconName; value: string }[] = [
-  { label: 'Settings', icon: 'settings', value: '' },
-  { label: 'Sync', icon: 'refresh', value: 'On' },
-  { label: 'Help & Support', icon: 'help', value: '' },
-  { label: 'About', icon: 'info', value: '' },
-];
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Profile'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
-export function ProfileScreen() {
+type Row = { label: string; icon: IconName; value: string; onPress?: () => void };
+
+export function ProfileScreen({ navigation }: Props) {
   const v = useRefScale();
   const { signOut, user } = useAuth();
   const displayName =
     (user as { user_metadata?: { display_name?: string } })?.user_metadata?.display_name ??
+    (user as { name?: string })?.name ??
     mockUser.name;
   const email = (user as { email?: string })?.email ?? mockUser.email;
   const avatar = v(50);
+
+  const rows: Row[] = [
+    {
+      label: 'Profile Settings',
+      icon: 'settings',
+      value: '',
+      onPress: () => navigation.navigate('EditProfile'),
+    },
+    { label: 'Sync', icon: 'refresh', value: 'On' },
+    { label: 'Help & Support', icon: 'help', value: '' },
+    { label: 'About', icon: 'info', value: '' },
+  ];
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
@@ -46,18 +63,36 @@ export function ProfileScreen() {
         </View>
       </View>
       <View style={[styles.menu, { paddingHorizontal: v(22) }]}>
-        {ROWS.map((r) => (
-          <View key={r.label} style={[styles.menuRow, { gap: v(11), paddingVertical: v(11) }]}>
-            <View style={[styles.menuIcon, { width: v(29), height: v(29), borderRadius: v(9) }]}>
-              <Icon name={r.icon} size={v(15)} color="#6a6e76" />
+        {rows.map((r) => {
+          const inner = (
+            <>
+              <View style={[styles.menuIcon, { width: v(29), height: v(29), borderRadius: v(9) }]}>
+                <Icon name={r.icon} size={v(15)} color="#6a6e76" />
+              </View>
+              <Text style={[styles.label, { fontSize: v(13) }]}>{r.label}</Text>
+              {r.value ? (
+                <Text style={[styles.value, { fontSize: v(12), marginRight: v(2) }]}>{r.value}</Text>
+              ) : null}
+              <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
+            </>
+          );
+          const rowStyle = [styles.menuRow, { gap: v(11), paddingVertical: v(11) }];
+          return r.onPress ? (
+            <Pressable
+              key={r.label}
+              accessibilityRole="button"
+              accessibilityLabel={r.label}
+              onPress={r.onPress}
+              style={rowStyle}
+            >
+              {inner}
+            </Pressable>
+          ) : (
+            <View key={r.label} style={rowStyle}>
+              {inner}
             </View>
-            <Text style={[styles.label, { fontSize: v(13) }]}>{r.label}</Text>
-            {r.value ? (
-              <Text style={[styles.value, { fontSize: v(12), marginRight: v(2) }]}>{r.value}</Text>
-            ) : null}
-            <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
-          </View>
-        ))}
+          );
+        })}
       </View>
       <Pressable
         accessibilityRole="button"

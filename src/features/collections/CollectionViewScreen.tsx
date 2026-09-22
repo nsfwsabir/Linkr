@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { LinkListItem } from '../../components/ListItems';
 import { Icon, CollectionIcon } from '../../components/Icon';
-import { mockCollections, mockCollectionLinks } from '../../utils/mockData';
+import { mockCollections } from '../../utils/mockData';
+import { useLinks } from '../../app/providers/LinksProvider';
 import { useRefScale } from '../../utils/useRefScale';
 import { colors, collectionThemes } from '../../theme';
 
@@ -13,6 +14,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CollectionView'>;
 
 export function CollectionViewScreen({ route, navigation }: Props) {
   const v = useRefScale();
+  const { collectionLinks } = useLinks();
   const collection =
     mockCollections.find((c) => c.id === route.params.collectionId) ?? mockCollections[0];
   const theme = collectionThemes[collection.color_key];
@@ -52,7 +54,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
         </View>
       </View>
       <FlatList
-        data={mockCollectionLinks}
+        data={collectionLinks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingHorizontal: v(22) }]}
         ListEmptyComponent={

@@ -15,6 +15,7 @@ import { CollectionViewScreen } from '../../features/collections/CollectionViewS
 import { LinkDetailScreen } from '../../features/links/LinkDetailScreen';
 import { SearchScreen } from '../../features/search/SearchScreen';
 import { ProfileScreen } from '../../features/profile/ProfileScreen';
+import { EditProfileScreen } from '../../features/profile/EditProfileScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -24,6 +25,7 @@ export type RootStackParamList = {
   Main: undefined;
   CollectionView: { collectionId: string };
   LinkDetail: { linkId: string };
+  EditProfile: undefined;
 };
 
 export type MainTabParamList = {
@@ -65,6 +67,7 @@ export function RootNavigator() {
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="CollectionView" component={CollectionViewScreen} />
             <Stack.Screen name="LinkDetail" component={LinkDetailScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           </>
         ) : (
           <>

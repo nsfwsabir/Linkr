@@ -24,6 +24,11 @@ type AuthContextValue = {
     password: string,
   ) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
+  /** Persist display name (and optional email change) to the signed-in user. */
+  updateProfile: (
+    displayName: string,
+    email: string,
+  ) => Promise<{ error: string | null }>;
   /** Mock bypass used before backend is configured. */
   signInMock: () => void;
   signOut: () => Promise<void>;
@@ -37,6 +42,7 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithEmail: async () => ({ error: 'Supabase is not configured.' }),
   signUpWithEmail: async () => ({ error: 'Supabase is not configured.' }),
   signInWithGoogle: async () => ({ error: 'Supabase is not configured.' }),
+  updateProfile: async () => ({ error: 'Supabase is not configured.' }),
   signInMock: () => {},
   signOut: async () => {},
 });
@@ -91,6 +97,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           options: { skipBrowserRedirect: true },
         });
         // Native redirect completes via deep link; surface any immediate error.
+        return { error: error?.message ?? null };
+      },
+      updateProfile: async (displayName, email) => {
+        const name = displayName.trim();
+        const mail = email.trim();
+        if (!supabase) {
+          // Mock UI mode: keep the local session in sync so Profile reflects edits.
+          setSession({ user: { ...mockUser, name, email: mail } });
+          return { error: null };
+        }
+        const currentEmail =
+          (session as Session)?.user?.email ??
+          (session as { user?: { email?: string } })?.user?.email ??
+          '';
+        const payload: { data: { display_name: string }; email?: string } = {
+          data: { display_name: name },
+        };
+        if (mail && mail !== currentEmail) payload.email = mail;
+        const { error } = await supabase.auth.updateUser(payload);
         return { error: error?.message ?? null };
       },
       signInMock: () => setSession({ user: mockUser }),
