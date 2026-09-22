@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store';
 import {
   View,
   Text,
   Pressable,
   StyleSheet,
-  Alert,
   Appearance,
   useColorScheme,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -38,37 +37,55 @@ export function ProfileScreen({ navigation }: Props) {
   const email = (user as { email?: string })?.email ?? mockUser.email;
   const avatar = v(50);
 
-  const colorScheme = useColorScheme();
-  const dark = colorScheme === 'dark';
+  const systemScheme = useColorScheme();
+  const [isDark, setIsDark] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const listener = Appearance.addChangeListener(({ colorScheme: newScheme }) => {
-      // useColorScheme hook updates on re-render; no manual state needed.
+    let mounted = true;
+    SecureStore.getItemAsync('dark_mode')
+      .then((raw) => {
+        if (!mounted) return;
+        if (raw !== null) setIsDark(JSON.parse(raw));
+        else setIsDark(systemScheme === 'dark');
+      })
+      .catch(() => {
+        if (mounted) setIsDark(systemScheme === 'dark');
+      });
+
+    const sub = Appearance.addChangeListener(({ colorScheme }) => {
+      SecureStore.getItemAsync('dark_mode').then((raw) => {
+        if (!mounted) return;
+        if (raw === null) setIsDark(colorScheme === 'dark');
+      });
     });
-    return () => listener.remove();
+    return () => {
+      mounted = false;
+      sub.remove();
+    };
   }, []);
 
-  // Conditional style overrides for dark mode.
-  const darkStyles = dark
+  const dark = isDark ?? systemScheme === 'dark';
+
+  const s = dark
     ? {
         containerBg: colors.screenBgDark,
         avatarBg: '#2a2d36',
         textPrimary: '#fff',
         textSecondary: colors.textTertiary,
-        borderColor: colors.borderDark,
         inputBg: colors.inputBgDark,
         signoutBg: colors.signoutBgDark,
         signoutText: colors.signoutTextDark,
+        border: colors.borderDark,
       }
     : {
         containerBg: colors.screenBg,
         avatarBg: '#dfe2e8',
         textPrimary: colors.textPrimary,
         textSecondary: colors.textSecondary,
-        borderColor: colors.border,
         inputBg: colors.inputBg,
         signoutBg: colors.signoutBg,
         signoutText: colors.signoutText,
+        border: colors.border,
       };
 
   const rows: Row[] = [
@@ -86,16 +103,18 @@ export function ProfileScreen({ navigation }: Props) {
       icon: 'settings',
       value: dark ? 'On' : 'Off',
       onPress: () => {
-        // Dark mode follows system scheme; no-op toggle.
+        const next = !dark;
+        setIsDark(next);
+        SecureStore.setItemAsync('dark_mode', JSON.stringify(next)).catch(() => {});
       },
     },
   ];
 
   return (
-    <SafeAreaView edges={['top']} style={[
-      styles.container,
-      { backgroundColor: darkStyles.containerBg },
-    ]}>
+    <SafeAreaView
+      edges={['top']}
+      style={[styles.container, { backgroundColor: s.containerBg }]}
+    >
       <AppHeader title="Settings" />
       <View
         style={[
@@ -106,8 +125,7 @@ export function ProfileScreen({ navigation }: Props) {
         <View
           style={[
             styles.avatar,
-            { backgroundColor: darkStyles.avatarBg },
-            { width: avatar, height: avatar, borderRadius: avatar / 2 },
+            { backgroundColor: s.avatarBg, width: avatar, height: avatar, borderRadius: avatar / 2 },
           ]}
           accessibilityRole="image"
           accessibilityLabel="Profile avatar"
@@ -115,16 +133,10 @@ export function ProfileScreen({ navigation }: Props) {
           <Icon name="user" size={v(24)} color="#9aa0a8" />
         </View>
         <View>
-          <Text style={[
-            styles.name,
-            { fontSize: v(15.5), color: darkStyles.textPrimary },
-          ]}>
+          <Text style={[styles.name, { fontSize: v(15.5), color: s.textPrimary }]}>
             {displayName}
           </Text>
-          <Text style={[
-            styles.email,
-            { fontSize: v(11.5), marginTop: v(2), color: darkStyles.textSecondary },
-          ]}>
+          <Text style={[styles.email, { fontSize: v(11.5), marginTop: v(2), color: s.textSecondary }]}>
             {email}
           </Text>
         </View>
@@ -133,21 +145,29 @@ export function ProfileScreen({ navigation }: Props) {
         {rows.map((r) => {
           const inner = (
             <>
-              <View style={[
-                styles.menuIcon,
-                { width: v(29), height: v(29), borderRadius: v(9) },
-                { backgroundColor: darkStyles.inputBg },
-              ]}>
+              <View
+                style={[
+                  styles.menuIcon,
+                  { width: v(29), height: v(29), borderRadius: v(9), backgroundColor: s.inputBg },
+                ]}
+              >
                 <Icon name={r.icon} size={v(15)} color="#6a6e76" />
               </View>
-              <Text style={[styles.label, { fontSize: v(13), color: darkStyles.textPrimary }]}>{r.label}</Text>
+              <Text style={[styles.label, { fontSize: v(13), color: s.textPrimary }]}>
+                {r.label}
+              </Text>
               {r.value ? (
-                <Text style={[styles.value, { fontSize: v(12), marginRight: v(2), color: colors.textTertiary }]}>{r.value}</Text>
+                <Text style={[styles.value, { fontSize: v(12), marginRight: v(2), color: colors.textTertiary }]}>
+                  {r.value}
+                </Text>
               ) : null}
               <Icon name="chevronRight" size={v(15)} color={colors.textTertiary} />
             </>
           );
-          const rowStyle = [styles.menuRow, { gap: v(11), paddingVertical: v(11) }];
+          const rowStyle = [
+            styles.menuRow,
+            { gap: v(11), paddingVertical: v(11), borderBottomColor: s.border },
+          ];
           return r.onPress ? (
             <Pressable
               key={r.label}
@@ -176,14 +196,11 @@ export function ProfileScreen({ navigation }: Props) {
             marginTop: v(16),
             height: v(46),
             borderRadius: v(14),
-            backgroundColor: darkStyles.signoutBg,
+            backgroundColor: s.signoutBg,
           },
         ]}
       >
-        <Text style={[
-          styles.signoutText,
-          { fontSize: v(13.5), color: darkStyles.signoutText },
-        ]}>
+        <Text style={[styles.signoutText, { fontSize: v(13.5), color: s.signoutText }]}>
           Sign Out
         </Text>
       </Pressable>
