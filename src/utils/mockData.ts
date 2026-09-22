@@ -55,7 +55,7 @@ export const mockCollections: Collection[] = [
   },
 ];
 
-/** Mock links matching Home + Collection View screens. */
+/** Unified seed pool: Home list rows + Collection View rows (all membership via collection_ids). */
 export const mockLinks: Link[] = [
   {
     id: 'l-1',
