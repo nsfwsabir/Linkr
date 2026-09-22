@@ -66,9 +66,15 @@ export function HomeScreen({ navigation }: Props) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.tabsRow}
         contentContainerStyle={[
           styles.tabs,
-          { gap: v(4), paddingHorizontal: v(20), marginBottom: v(10) },
+          {
+            gap: v(4),
+            paddingHorizontal: v(20),
+            marginBottom: v(10),
+            alignItems: 'center',
+          },
         ]}
       >
         <Pressable
@@ -148,9 +154,10 @@ export function HomeScreen({ navigation }: Props) {
         ) : null}
       </ScrollView>
       <FlatList
+        style={styles.list}
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.list, { paddingHorizontal: v(22), paddingBottom: v(96) }]}
+        contentContainerStyle={[{ paddingHorizontal: v(22), paddingBottom: v(96) }]}
         ListEmptyComponent={
           <Text style={[styles.empty, { marginTop: v(32), color: c.textTertiary }]}>
             {emptyMessage}
@@ -172,9 +179,10 @@ export function HomeScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  tabsRow: { flexGrow: 0, flexShrink: 0, maxHeight: 48 },
   tabs: { flexGrow: 0, flexShrink: 0 },
-  tab: { flexGrow: 0, flexShrink: 0, justifyContent: 'center' },
+  tab: { flexGrow: 0, flexShrink: 0, justifyContent: 'center', alignSelf: 'flex-start' },
   tabText: { fontWeight: '600', flexShrink: 0 },
-  list: {},
+  list: { flex: 1 },
   empty: { textAlign: 'center' },
 });
