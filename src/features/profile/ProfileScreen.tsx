@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
@@ -13,7 +13,7 @@ import { useRefScale } from '../../utils/useRefScale';
 import { colors } from '../../theme';
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<MainTabParamList, 'Profile'>,
+  BottomTabScreenProps<MainTabParamList, 'Settings'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
@@ -31,7 +31,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   const rows: Row[] = [
     {
-      label: 'Profile Settings',
+      label: 'Settings',
       icon: 'settings',
       value: '',
       onPress: () => navigation.navigate('EditProfile'),
@@ -39,11 +39,17 @@ export function ProfileScreen({ navigation }: Props) {
     { label: 'Sync', icon: 'refresh', value: 'On' },
     { label: 'Help & Support', icon: 'help', value: '' },
     { label: 'About', icon: 'info', value: '' },
+    {
+      label: 'Dark mode',
+      icon: 'settings',
+      value: '',
+      onPress: () => Alert.alert('Dark mode', 'Toggle dark mode feature.'),
+    },
   ];
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
-      <AppHeader title="Profile" />
+      <AppHeader title="Settings" />
       <View
         style={[
           styles.profileRow,
