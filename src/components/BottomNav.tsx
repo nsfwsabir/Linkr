@@ -21,12 +21,11 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
   const v = useRefScale();
   const insets = useSafeAreaInsets();
   const { dark, c } = useTheme();
-  const radius = v(28);
 
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.host, { left: v(44), right: v(44), bottom: insets.bottom + v(10) }]}
+      style={[styles.host, { left: v(56), right: v(56), bottom: insets.bottom + v(10) }]}
     >
       <BlurView
         intensity={dark ? 45 : 65}
@@ -35,7 +34,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
         style={[
           styles.pill,
           {
-            borderRadius: radius,
+            borderRadius: 999,
             paddingVertical: v(8),
             paddingHorizontal: v(6),
             backgroundColor: dark ? 'rgba(30,33,38,0.62)' : 'rgba(255,255,255,0.65)',
@@ -62,7 +61,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
               onPress={() => {
                 if (route) navigation.navigate(route.name);
               }}
-              style={[styles.item, { gap: v(3), minWidth: v(56), paddingVertical: v(4) }]}
+              style={[styles.item, { gap: v(3), minWidth: v(52), paddingVertical: v(4) }]}
             >
               <Icon name={t.icon} size={v(21)} color={color} />
               <Text
