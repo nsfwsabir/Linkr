@@ -23,8 +23,9 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const link = links.find((l) => l.id === route.params.linkId);
 
   const collection = useMemo(() => {
-    if (!link?.collection_ids?.length) return collections[0];
-    return collections.find((col) => col.id === link.collection_ids[0]) ?? collections[0];
+    const collectionId = link?.collection_ids?.[0];
+    if (!collectionId) return collections[0];
+    return collections.find((col) => col.id === collectionId) ?? collections[0];
   }, [collections, link]);
 
   const { metadata } = useLinkPreview(link?.original_url ?? '');
@@ -43,6 +44,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
       </SafeAreaView>
     );
   }
+
+  const openLink = async () => {
+    try {
+      const supported = await Linking.canOpenURL(link.original_url);
+      if (supported) await Linking.openURL(link.original_url);
+      else Alert.alert('Cannot open link', link.original_url);
+    } catch {
+      Alert.alert('Cannot open link', link.original_url);
+    }
+  };
 
   const bannerUri = link.preview_image_url ?? metadata?.preview_image_url ?? null;
   const iconUri = faviconFailed ? null : faviconUrl(link.source_domain);
@@ -233,16 +244,6 @@ export function LinkDetailScreen({ route, navigation }: Props) {
       </BottomSheet>
     </SafeAreaView>
   );
-
-  async function openLink() {
-    try {
-      const supported = await Linking.canOpenURL(link.original_url);
-      if (supported) await Linking.openURL(link.original_url);
-      else Alert.alert('Cannot open link', link.original_url);
-    } catch {
-      Alert.alert('Cannot open link', link.original_url);
-    }
-  }
 }
 
 const styles = StyleSheet.create({
