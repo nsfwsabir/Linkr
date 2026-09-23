@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, InteractionManager } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -21,7 +21,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, deleteLink, setLinkCollection } = useLinks();
   const { c, dark } = useTheme();
-  // Same translucent glass as BottomNav pill (blur once transition settles).
+  // Same translucent glass as BottomNav pill (real blur on iOS; solid on Android).
   const glassBg = {
     borderRadius: 999,
     backgroundColor: dark ? 'rgba(30,33,38,0.62)' : 'rgba(255,255,255,0.65)',
@@ -44,18 +44,12 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
-  // dimezisBlurView during the Android stack push can leave this screen
-  // invisible — mount FAB blur only after the transition settles.
-  const [fabBlurReady, setFabBlurReady] = useState(false);
+  // Android blur during stack slides flashes white and janks — solid glass there.
+  const useFabBlur = Platform.OS === 'ios';
 
   useEffect(() => {
     setFaviconFailed(false);
   }, [link?.id]);
-
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => setFabBlurReady(true));
-    return () => task.cancel();
-  }, []);
 
   if (!linkId || !link) {
     return (
@@ -141,12 +135,10 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
             ]}
           >
-            {/* Glass FAB matches BottomNav: blur once the push transition ends. */}
-            {fabBlurReady ? (
+            {useFabBlur ? (
               <BlurView
                 intensity={dark ? 45 : 65}
                 tint={dark ? 'dark' : 'light'}
-                experimentalBlurMethod="dimezisBlurView"
                 style={[styles.fabGlass, glassBg]}
               >
                 <Icon name="arrowLeft" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
@@ -166,11 +158,10 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
             ]}
           >
-            {fabBlurReady ? (
+            {useFabBlur ? (
               <BlurView
                 intensity={dark ? 45 : 65}
                 tint={dark ? 'dark' : 'light'}
-                experimentalBlurMethod="dimezisBlurView"
                 style={[styles.fabGlass, glassBg]}
               >
                 <Icon name="dots" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />

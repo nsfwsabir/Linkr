@@ -86,11 +86,10 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // Short, smooth open/close. Android ios_from_right uses
-          // config_shortAnimTime (~200ms) with accelerate_decelerate.
-          // Fade + dimezisBlurView leaves the pushed screen invisible on Android.
+          // Short (~200ms) smooth slide. Avoid fade + blur (invisible screen)
+          // and android dimezisBlurView (white flash + jank while sliding).
           animation: Platform.OS === 'ios' ? 'simple_push' : 'ios_from_right',
-          animationDuration: 250,
+          animationDuration: 200,
           autoHideHomeIndicator: true,
         }}
       >
