@@ -89,7 +89,12 @@ export function RootNavigator() {
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="CollectionView" component={CollectionViewScreen} />
-            <Stack.Screen name="LinkDetail" component={LinkDetailScreen} />
+            {/* Pop uses the leaving screen's animation — none = instant back. */}
+            <Stack.Screen
+              name="LinkDetail"
+              component={LinkDetailScreen}
+              options={{ animation: 'none' }}
+            />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           </>
         ) : (
