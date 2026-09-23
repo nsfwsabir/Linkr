@@ -46,11 +46,8 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
-        transitionSpec: {
-          animation: 'timing',
-          config: { duration: 180 },
-        },
+        // Instant switch avoids the double-exposure ghost of a JS cross-fade.
+        animation: 'none',
       }}
       // eslint-disable-next-line react/no-unstable-nested-components
       tabBar={(props) => <BottomNav {...props} />}
@@ -86,8 +83,11 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // default (not fade/slide) plays nice with BottomNav BlurView on Android.
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'default',
+          // Android: pure `fade` alpha-animates both screens and blanks the
+          // BottomNav dimezisBlurView mid-transition. fade_from_bottom keeps
+          // the outgoing Main static (rns_no_animation_350) and only animates
+          // the incoming screen — short, not a side slide.
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'fade_from_bottom',
           animationDuration: 200,
           autoHideHomeIndicator: true,
         }}
