@@ -258,13 +258,12 @@ export function LinkDetailScreen({ route, navigation }: Props) {
         </Pressable>
       </View>
 
-      {collectionPickerVisible ? (
-        <BottomSheet
-          visible
-          title="Add to collection"
-          onClose={() => setCollectionPickerVisible(false)}
-        >
-          {collections.map((col) => {
+      <BottomSheet
+        visible={collectionPickerVisible}
+        title="Add to collection"
+        onClose={() => setCollectionPickerVisible(false)}
+      >
+        {collections.map((col) => {
             const selected = col.id === collection?.id;
             const t = theme[col.color_key];
             return (
@@ -294,18 +293,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
                 </Text>
                 {selected ? <Icon name="chevronRight" size={v(15)} color={t.fg} /> : null}
               </Pressable>
-            );
-          })}
-        </BottomSheet>
-      ) : null}
+          );
+        })}
+      </BottomSheet>
 
-      {actionsVisible ? (
-        <BottomSheet
-          visible
-          title={confirming ? 'Delete link?' : 'Link actions'}
-          onClose={closeActions}
-        >
-          {confirming ? (
+      <BottomSheet
+        visible={actionsVisible}
+        title={confirming ? 'Delete link?' : 'Link actions'}
+        onClose={closeActions}
+      >
+        {confirming ? (
             <View>
               <Text
                 style={[
@@ -357,8 +354,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               </Text>
             </Pressable>
           )}
-        </BottomSheet>
-      ) : null}
+      </BottomSheet>
     </SafeAreaView>
   );
 }

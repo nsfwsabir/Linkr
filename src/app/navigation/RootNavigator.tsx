@@ -44,7 +44,14 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+        transitionSpec: {
+          animation: 'timing',
+          config: { duration: 180 },
+        },
+      }}
       // eslint-disable-next-line react/no-unstable-nested-components
       tabBar={(props) => <BottomNav {...props} />}
     >
@@ -79,9 +86,11 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
+          // Short, smooth open/close. Android ios_from_right uses
+          // config_shortAnimTime (~200ms) with accelerate_decelerate.
           // Fade + dimezisBlurView leaves the pushed screen invisible on Android.
-          // simple_push is iOS-only; use slide elsewhere.
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'slide_from_right',
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'ios_from_right',
+          animationDuration: 250,
           autoHideHomeIndicator: true,
         }}
       >
@@ -89,12 +98,7 @@ export function RootNavigator() {
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="CollectionView" component={CollectionViewScreen} />
-            {/* Pop uses the leaving screen's animation — none = instant back. */}
-            <Stack.Screen
-              name="LinkDetail"
-              component={LinkDetailScreen}
-              options={{ animation: 'none' }}
-            />
+            <Stack.Screen name="LinkDetail" component={LinkDetailScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           </>
         ) : (

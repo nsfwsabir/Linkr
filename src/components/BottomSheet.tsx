@@ -1,9 +1,12 @@
-import React, { ReactNode } from 'react';
-import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, Modal, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRefScale } from '../utils/useRefScale';
 import { Icon } from './Icon';
 import { useTheme } from '../app/providers/ThemeProvider';
+
+const OPEN_MS = 200;
+const CLOSE_MS = 160;
 
 export function BottomSheet({
   visible,
@@ -20,11 +23,44 @@ export function BottomSheet({
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
   const x = v(26);
+  const screenH = Dimensions.get('window').height;
+  const [mounted, setMounted] = useState(visible);
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: OPEN_MS,
+        useNativeDriver: true,
+      }).start();
+      return;
+    }
+    Animated.timing(progress, {
+      toValue: 0,
+      duration: CLOSE_MS,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) setMounted(false);
+    });
+  }, [visible, progress]);
+
+  if (!mounted) return null;
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.dim, { backgroundColor: c.overlay }]}>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <Animated.View
+        style={[styles.dim, { backgroundColor: c.overlay, opacity: progress }]}
+      >
         <Pressable style={styles.dimPress} onPress={onClose} accessibilityLabel="Close" />
-        <View
+        <Animated.View
           style={[
             styles.sheet,
             {
@@ -33,6 +69,15 @@ export function BottomSheet({
               borderTopRightRadius: v(28),
               padding: v(20),
               paddingBottom: Math.max(v(24), insets.bottom),
+              opacity: progress,
+              transform: [
+                {
+                  translateY: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [screenH, 0],
+                  }),
+                },
+              ],
             },
           ]}
         >
@@ -50,8 +95,8 @@ export function BottomSheet({
             </Pressable>
           </View>
           {children}
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }
