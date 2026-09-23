@@ -83,12 +83,12 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // Android: pure `fade` alpha-animates both screens and blanks the
-          // BottomNav dimezisBlurView mid-transition. fade_from_bottom keeps
-          // the outgoing Main static (rns_no_animation_350) and only animates
-          // the incoming screen — short, not a side slide.
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'fade_from_bottom',
-          animationDuration: 200,
+          // Android: fade_from_bottom intermittently left LinkDetail mounted
+          // but stuck at fromAlpha=0 (pure white) under new-arch draw-reorder.
+          // `none` matches tabs — reliable paint, no blur blank, no stutter.
+          // iOS keeps simple_push (animationDuration is iOS-only).
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'none',
+          animationDuration: Platform.OS === 'ios' ? 200 : undefined,
           autoHideHomeIndicator: true,
         }}
       >
