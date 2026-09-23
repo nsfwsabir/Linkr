@@ -86,9 +86,8 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // Short (~200ms) smooth slide. Avoid fade + blur (invisible screen)
-          // and android dimezisBlurView (white flash + jank while sliding).
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'ios_from_right',
+          // default (not fade/slide) plays nice with BottomNav BlurView on Android.
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'default',
           animationDuration: 200,
           autoHideHomeIndicator: true,
         }}
