@@ -79,9 +79,9 @@ export function RootNavigator() {
           headerShown: false,
           // Match screen bg so the native window never flashes white mid-push.
           contentStyle: { backgroundColor: c.screenBg },
-          // Fade avoids Android default-slide jank while heavy detail mounts.
-          // simple_push is iOS-only and maps to DEFAULT on Android (jittery).
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'fade',
+          // Fade + dimezisBlurView leaves the pushed screen invisible on Android.
+          // simple_push is iOS-only; use slide elsewhere.
+          animation: Platform.OS === 'ios' ? 'simple_push' : 'slide_from_right',
           autoHideHomeIndicator: true,
         }}
       >
