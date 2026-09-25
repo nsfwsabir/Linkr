@@ -59,6 +59,13 @@ alter table public.collections enable row level security;
 alter table public.links enable row level security;
 alter table public.link_collections enable row level security;
 
+-- Postgres has no `create policy if not exists`, so drop first to keep the
+-- whole migration re-runnable like the DDL above.
+drop policy if exists "profiles_owner" on public.profiles;
+drop policy if exists "collections_owner" on public.collections;
+drop policy if exists "links_owner" on public.links;
+drop policy if exists "link_collections_owner" on public.link_collections;
+
 create policy "profiles_owner" on public.profiles for all using (auth.uid() = id) with check (auth.uid() = id);
 create policy "collections_owner" on public.collections for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "links_owner" on public.links for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -67,3 +74,18 @@ create policy "link_collections_owner" on public.link_collections for all using 
 ) with check (
   exists (select 1 from public.links l where l.id = link_id and l.user_id = auth.uid())
 );
+
+-- Privileges. RLS decides *which rows* a role may touch; these grants decide
+-- whether the role can touch the table at all. Stated explicitly so the schema
+-- is self-sufficient instead of relying on the project's default privileges —
+-- without them the client fails with "permission denied for table links" even
+-- though the policies look correct.
+grant usage on schema public to anon, authenticated, service_role;
+
+grant all on table public.profiles to authenticated, service_role;
+grant all on table public.collections to authenticated, service_role;
+grant all on table public.links to authenticated, service_role;
+grant all on table public.link_collections to authenticated, service_role;
+
+-- Reads for signed-out visitors are pointless (every policy is auth.uid()-based,
+-- so an anonymous read returns nothing), so anon is not granted on the tables.
