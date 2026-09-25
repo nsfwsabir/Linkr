@@ -12,6 +12,7 @@ import { LinkListItem } from '../../components/ListItems';
 import { SaveLinkSheet } from '../links/SaveLinkSheet';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
+import { sortByTitle } from '../../utils/sort';
 import { useRefScale } from '../../utils/useRefScale';
 import { openLinkDetail } from '../../utils/navigateLinkDetail';
 
@@ -41,12 +42,13 @@ export function HomeScreen({ navigation }: Props) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return links.filter((l) => {
+    const matches = links.filter((l) => {
       const matchesQuery =
         !q || l.title.toLowerCase().includes(q) || l.source_domain.toLowerCase().includes(q);
       const matchesFilter = !filterId || l.collection_ids?.includes(filterId);
       return matchesQuery && matchesFilter;
     });
+    return sortByTitle(matches);
   }, [query, filterId, links]);
 
   const emptyMessage = filterId

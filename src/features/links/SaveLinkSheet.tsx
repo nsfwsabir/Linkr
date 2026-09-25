@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { BottomSheet } from '../../components/BottomSheet';
-import { Icon } from '../../components/Icon';
+import { Icon, CollectionIcon } from '../../components/Icon';
 import { AppTextInput } from '../../components/Inputs';
 import { PrimaryButton } from '../../components/Buttons';
 import { useLinkPreview } from './useLinkPreview';
@@ -148,7 +148,11 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
           },
         ]}
       >
-        <Icon name="folder" size={v(16)} color={colors.blue} />
+        <CollectionIcon
+          iconKey={selectedCollection?.icon_key ?? 'folder'}
+          size={v(16)}
+          color={themesFor(c)[selectedCollection?.color_key ?? 'blue'].fg}
+        />
         <Text style={[styles.dropdownText, { fontSize: v(13), color: c.textPrimary }]}>
           {selectedCollection?.name ?? 'Read Later'}
         </Text>
@@ -185,7 +189,7 @@ export function SaveLinkSheet({ visible, onClose }: { visible: boolean; onClose:
               ]}
             >
               <View style={[styles.pickIcon, { backgroundColor: c.cardBg, width: v(32), height: v(32), borderRadius: v(10) }]}>
-                <Icon name="folder" size={v(15)} color={t.fg} />
+                <CollectionIcon iconKey={col.icon_key} size={v(15)} color={t.fg} />
               </View>
               <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
                 {col.name}
