@@ -10,12 +10,16 @@ export function PrimaryButton({
   onPress,
   style,
   accessibilityLabel,
+  compact = false,
 }: {
   title: string;
   icon?: IconName;
   onPress?: () => void;
   style?: ViewStyle;
   accessibilityLabel?: string;
+  /** Slightly shorter/tighter variant for in-page actions. Off by default so
+   *  the full-height (50) sign-in / create-account buttons are unaffected. */
+  compact?: boolean;
 }) {
   const v = useRefScale();
   const { c } = useTheme();
@@ -26,12 +30,18 @@ export function PrimaryButton({
       onPress={onPress}
       style={[
         styles.base,
-        { gap: v(8), height: v(50), borderRadius: v(14), marginTop: v(6), backgroundColor: c.dark },
+        {
+          gap: v(8),
+          height: v(compact ? 46 : 50),
+          borderRadius: v(compact ? 13 : 14),
+          marginTop: v(6),
+          backgroundColor: c.dark,
+        },
         style,
       ]}
     >
       {icon ? <Icon name={icon} size={v(16)} color="#fff" /> : null}
-      <Text style={[styles.text, { fontSize: v(14.5) }]}>{title}</Text>
+      <Text style={[styles.text, { fontSize: v(compact ? 14 : 14.5) }]}>{title}</Text>
     </Pressable>
   );
 }

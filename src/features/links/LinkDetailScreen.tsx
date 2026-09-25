@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { PrimaryButton, OutlineButton } from '../../components/Buttons';
-import { Icon } from '../../components/Icon';
+import { Icon, CollectionIcon } from '../../components/Icon';
 import { BottomSheet } from '../../components/BottomSheet';
 import { useLinkPreview } from './useLinkPreview';
 import { faviconUrl } from '../../utils/url';
@@ -216,14 +216,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             {description}
           </Text>
         ) : null}
-        <PrimaryButton title="Open Link" icon="external" onPress={openLink} />
+        <PrimaryButton title="Open Link" icon="external" onPress={openLink} compact />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add to collection"
           onPress={() => setCollectionPickerVisible(true)}
           style={[
             styles.row,
-            { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
+            // No divider here: it butted straight against the filled button and
+            // read as a stray hairline. The row below keeps its own.
+            { paddingVertical: v(11), marginTop: v(2), borderTopWidth: 0 },
           ]}
         >
           <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>
@@ -231,13 +233,11 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           </Text>
           <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Change collection"
-          onPress={() => setCollectionPickerVisible(true)}
+        {/* Static metadata, not an action — no tap target and no chevron. */}
+        <View
           style={[
             styles.row,
-            { paddingVertical: v(11), marginTop: v(4), borderTopColor: c.border },
+            { paddingVertical: v(11), marginTop: v(4), borderTopWidth: 1, borderTopColor: c.border },
           ]}
         >
           <View>
@@ -247,8 +247,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               {collection ? ` · ${collection.name}` : ''}
             </Text>
           </View>
-          <Icon name="chevronRight" size={v(15)} color={c.textTertiary} />
-        </Pressable>
+        </View>
       </View>
 
       <BottomSheet
@@ -279,7 +278,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
                 ]}
               >
                 <View style={[styles.pickIcon, { backgroundColor: t.bg, width: v(32), height: v(32), borderRadius: v(10) }]}>
-                  <Icon name="folder" size={v(15)} color={t.fg} />
+                  <CollectionIcon iconKey={col.icon_key} size={v(15)} color={t.fg} />
                 </View>
                 <Text style={[styles.pickName, { fontSize: v(13.5), color: c.textPrimary, flex: 1 }]}>
                   {col.name}
