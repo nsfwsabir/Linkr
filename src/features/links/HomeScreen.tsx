@@ -61,7 +61,7 @@ export function HomeScreen({ navigation }: Props) {
         title="Linker"
         right={
           <RoundIconButton label="Save a link" onPress={() => setSheetVisible(true)}>
-            <Icon name="plus" size={v(15)} color="#fff" />
+            <Icon name="plus" size={v(15)} color={c.inverseText} />
           </RoundIconButton>
         }
       />
@@ -91,14 +91,14 @@ export function HomeScreen({ navigation }: Props) {
               paddingHorizontal: v(10),
               minHeight: v(30),
               borderRadius: v(20),
-              backgroundColor: filterId === null ? c.dark : c.inputBg,
+              backgroundColor: filterId === null ? c.inverse : c.inputBg,
             },
           ]}
         >
           <Text
             style={[
               styles.tabText,
-              { fontSize: v(11), color: filterId === null ? '#fff' : c.textSecondary },
+              { fontSize: v(11), color: filterId === null ? c.inverseText : c.textSecondary },
             ]}
             numberOfLines={1}
           >
@@ -120,14 +120,14 @@ export function HomeScreen({ navigation }: Props) {
                   paddingHorizontal: v(10),
                   minHeight: v(30),
                   borderRadius: v(20),
-                  backgroundColor: selected ? c.dark : c.inputBg,
+                  backgroundColor: selected ? c.inverse : c.inputBg,
                 },
               ]}
             >
               <Text
                 style={[
                   styles.tabText,
-                  { fontSize: v(11), color: selected ? '#fff' : c.textSecondary },
+                  { fontSize: v(11), color: selected ? c.inverseText : c.textSecondary },
                 ]}
                 numberOfLines={1}
               >

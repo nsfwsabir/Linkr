@@ -75,7 +75,7 @@ export function CollectionsScreen({ navigation }: Props) {
         title="Collections"
         right={
           <RoundIconButton label="Create collection" onPress={() => setSheetVisible(true)}>
-            <Icon name="plus" size={v(15)} color="#fff" />
+            <Icon name="plus" size={v(15)} color={c.inverseText} />
           </RoundIconButton>
         }
       />

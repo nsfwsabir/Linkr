@@ -42,7 +42,7 @@ export function RoundIconButton({
   dark?: boolean;
 }) {
   const v = useRefScale();
-  const { c } = useTheme();
+  const { c, dark: isDarkTheme } = useTheme();
   const d = v(33);
   return (
     <Pressable
@@ -51,7 +51,12 @@ export function RoundIconButton({
       onPress={onPress}
       style={[
         styles.round,
-        { width: d, height: d, borderRadius: d / 2, backgroundColor: dark ? c.dark : c.inputBg },
+        {
+          width: d,
+          height: d,
+          borderRadius: d / 2,
+          backgroundColor: dark ? c.inverse : c.inputBg,
+        },
       ]}
       hitSlop={8}
     >

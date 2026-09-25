@@ -125,6 +125,13 @@ export type Palette = {
   tealBg: string;
   dark: string;
   white: string;
+  /**
+   * "Inverse" surfaces — primary buttons, round icon buttons, selected chips.
+   * They flip between themes so they never sit near the background colour:
+   * near-black on light, white on dark.
+   */
+  inverse: string;
+  inverseText: string;
   signoutBg: string;
   signoutText: string;
   overlay: string;
@@ -151,6 +158,8 @@ export const lightPalette: Palette = {
   tealBg: colors.tealBg,
   dark: colors.dark,
   white: colors.white,
+  inverse: colors.dark,
+  inverseText: colors.white,
   signoutBg: colors.signoutBg,
   signoutText: colors.signoutText,
   overlay: colors.overlay,
@@ -177,6 +186,8 @@ export const darkPalette: Palette = {
   tealBg: '#12332f',
   dark: '#2a2d36',
   white: colors.white,
+  inverse: colors.white,
+  inverseText: colors.textPrimary,
   signoutBg: colors.signoutBgDark,
   signoutText: colors.signoutTextDark,
   overlay: colors.overlay,

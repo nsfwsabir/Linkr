@@ -35,13 +35,15 @@ export function PrimaryButton({
           height: v(compact ? 46 : 50),
           borderRadius: v(compact ? 13 : 14),
           marginTop: v(6),
-          backgroundColor: c.dark,
+          backgroundColor: c.inverse,
         },
         style,
       ]}
     >
-      {icon ? <Icon name={icon} size={v(16)} color="#fff" /> : null}
-      <Text style={[styles.text, { fontSize: v(compact ? 14 : 14.5) }]}>{title}</Text>
+      {icon ? <Icon name={icon} size={v(16)} color={c.inverseText} /> : null}
+      <Text style={[styles.text, { fontSize: v(compact ? 14 : 14.5), color: c.inverseText }]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }
@@ -92,7 +94,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: { color: '#fff', fontWeight: '700' },
+  text: { fontWeight: '700' },
   outline: {
     flexDirection: 'row',
     borderWidth: 1,

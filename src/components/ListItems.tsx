@@ -4,18 +4,19 @@ import { useRefScale } from '../utils/useRefScale';
 import { formatRelativeTime } from '../utils/time';
 import { linkLetter } from '../utils/linkLetter';
 import { Icon, CollectionIcon } from './Icon';
-import { themesFor } from '../theme';
+import { colors, themesFor } from '../theme';
 import { useTheme } from '../app/providers/ThemeProvider';
 import type { Collection, Link, ThumbSpec } from '../types';
 
 /**
- * List tile artwork is a single letter in the theme's primary text colour on a
- * neutral surface, so it stays legible in both themes. The letter comes from
- * linkLetter so the tile and the list sort can never disagree.
+ * List tile artwork is a single letter, inverted between themes: near-black
+ * tile with a white letter in light mode, white tile with a near-black letter
+ * in dark mode. The letter comes from linkLetter so the tile and the list sort
+ * can never disagree.
  */
 function Thumb({ link }: { link: Link }) {
   const v = useRefScale();
-  const { c } = useTheme();
+  const { dark } = useTheme();
   const spec: ThumbSpec | undefined = link.thumb;
   return (
     <View
@@ -25,14 +26,14 @@ function Thumb({ link }: { link: Link }) {
           width: v(42),
           height: v(42),
           borderRadius: v(13),
-          backgroundColor: c.screenBgAlt,
+          backgroundColor: dark ? colors.white : colors.textPrimary,
         },
       ]}
     >
       <Text
         style={[
           styles.thumbText,
-          { fontSize: v(14), color: c.textPrimary },
+          { fontSize: v(14), color: dark ? colors.textPrimary : colors.white },
           spec?.serif && { fontFamily: 'serif' },
         ]}
       >
