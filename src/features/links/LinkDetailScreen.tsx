@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Linking, Alert, Image, Platform, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigation/RootNavigator';
 import { PrimaryButton, OutlineButton } from '../../components/Buttons';
@@ -21,12 +20,10 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, deleteLink, setLinkCollection } = useLinks();
   const { c, dark } = useTheme();
-  // Same translucent glass as BottomNav pill (real blur on iOS; solid on Android).
-  const glassBg = {
-    borderRadius: 999,
-    backgroundColor: dark ? 'rgba(30,33,38,0.62)' : 'rgba(255,255,255,0.65)',
-    borderColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.9)',
-  } as const;
+  // Source of truth: .nav-header.floating .icon-btn — near-opaque surface,
+  // not milky glass (rgba .65 + white hairline looked broken on light heroes).
+  const fabBg = dark ? c.cardBg : 'rgba(255,255,255,0.88)';
+  const fabFg = dark ? c.textPrimary : colors.textPrimary;
   // Params can be missing if the native stack restores state oddly — never throw.
   const linkId = route.params?.linkId;
   const link = linkId ? links.find((l) => l.id === linkId) : undefined;
@@ -44,8 +41,6 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const [actionsVisible, setActionsVisible] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
-  // Android blur during stack slides flashes white and janks — solid glass there.
-  const useFabBlur = Platform.OS === 'ios';
 
   useEffect(() => {
     setFaviconFailed(false);
@@ -90,6 +85,23 @@ export function LinkDetailScreen({ route, navigation }: Props) {
     setConfirming(false);
   };
 
+  const shareLink = async () => {
+    closeActions();
+    try {
+      await Share.share(
+        {
+          title: link.title,
+          message:
+            Platform.OS === 'android' ? `${link.title}\n${link.original_url}` : link.title,
+          url: link.original_url,
+        },
+        { dialogTitle: 'Share link', subject: link.title },
+      );
+    } catch {
+      Alert.alert('Cannot share', link.original_url);
+    }
+  };
+
   const handleDelete = () => {
     deleteLink(link.id);
     closeActions();
@@ -132,22 +144,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             onPress={() => navigation.goBack()}
             style={({ pressed }) => [
               styles.fab,
-              { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
+              {
+                width: fab,
+                height: fab,
+                borderRadius: fab / 2,
+                backgroundColor: fabBg,
+                opacity: pressed ? 0.75 : 1,
+              },
             ]}
           >
-            {useFabBlur ? (
-              <BlurView
-                intensity={dark ? 45 : 65}
-                tint={dark ? 'dark' : 'light'}
-                style={[styles.fabGlass, glassBg]}
-              >
-                <Icon name="arrowLeft" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
-              </BlurView>
-            ) : (
-              <View style={[styles.fabGlass, glassBg]}>
-                <Icon name="arrowLeft" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
-              </View>
-            )}
+            <Icon name="arrowLeft" size={v(17)} color={fabFg} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -155,22 +161,16 @@ export function LinkDetailScreen({ route, navigation }: Props) {
             onPress={() => setActionsVisible(true)}
             style={({ pressed }) => [
               styles.fab,
-              { width: fab, height: fab, borderRadius: fab / 2, opacity: pressed ? 0.75 : 1 },
+              {
+                width: fab,
+                height: fab,
+                borderRadius: fab / 2,
+                backgroundColor: fabBg,
+                opacity: pressed ? 0.75 : 1,
+              },
             ]}
           >
-            {useFabBlur ? (
-              <BlurView
-                intensity={dark ? 45 : 65}
-                tint={dark ? 'dark' : 'light'}
-                style={[styles.fabGlass, glassBg]}
-              >
-                <Icon name="dots" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
-              </BlurView>
-            ) : (
-              <View style={[styles.fabGlass, glassBg]}>
-                <Icon name="dots" size={v(17)} color={dark ? '#eef0f4' : colors.textPrimary} />
-              </View>
-            )}
+            <Icon name="dots" size={v(17)} color={fabFg} />
           </Pressable>
         </View>
       </LinearGradient>
@@ -324,26 +324,49 @@ export function LinkDetailScreen({ route, navigation }: Props) {
               <OutlineButton title="Cancel" onPress={() => setConfirming(false)} />
             </View>
           ) : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Delete link"
-              onPress={() => setConfirming(true)}
-              style={[
-                styles.deleteRow,
-                {
-                  gap: v(10),
-                  height: v(46),
-                  borderRadius: v(14),
-                  paddingHorizontal: v(14),
-                  backgroundColor: c.signoutBg,
-                },
-              ]}
-            >
-              <Icon name="trash" size={v(16)} color={c.signoutText} />
-              <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.signoutText }]}>
-                Delete link
-              </Text>
-            </Pressable>
+            <View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Share link"
+                onPress={shareLink}
+                style={[
+                  styles.deleteRow,
+                  {
+                    gap: v(10),
+                    height: v(46),
+                    borderRadius: v(14),
+                    paddingHorizontal: v(14),
+                    marginBottom: v(10),
+                    backgroundColor: c.inputBg,
+                  },
+                ]}
+              >
+                <Icon name="share" size={v(16)} color={c.textPrimary} />
+                <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.textPrimary }]}>
+                  Share link
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Delete link"
+                onPress={() => setConfirming(true)}
+                style={[
+                  styles.deleteRow,
+                  {
+                    gap: v(10),
+                    height: v(46),
+                    borderRadius: v(14),
+                    paddingHorizontal: v(14),
+                    backgroundColor: c.signoutBg,
+                  },
+                ]}
+              >
+                <Icon name="trash" size={v(16)} color={c.signoutText} />
+                <Text style={[styles.deleteRowText, { fontSize: v(13.5), color: c.signoutText }]}>
+                  Delete link
+                </Text>
+              </Pressable>
+            </View>
           )}
       </BottomSheet>
     </SafeAreaView>
@@ -364,13 +387,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
-  },
-  fabGlass: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
   },
   body: { flex: 1 },
   title: { fontWeight: '800' },
