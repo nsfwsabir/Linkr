@@ -20,9 +20,11 @@ export function LinkDetailScreen({ route, navigation }: Props) {
   const v = useRefScale();
   const { links, collections, deleteLink, setLinkCollection } = useLinks();
   const { c, dark } = useTheme();
-  // Source of truth: .nav-header.floating .icon-btn — near-opaque surface,
-  // not milky glass (rgba .65 + white hairline looked broken on light heroes).
-  const fabBg = dark ? c.cardBg : 'rgba(255,255,255,0.88)';
+  // Source of truth: .nav-header.floating .icon-btn — light pill, soft shadow.
+  // Must stay fully opaque: RN only derives the iOS shadow path from the border
+  // when background alpha > 0.999, otherwise it nulls shadowPath and falls back
+  // to a rasterized shadow, which tessellates into a visible octagon on device.
+  const fabBg = dark ? c.cardBg : colors.white;
   const fabFg = dark ? c.textPrimary : colors.textPrimary;
   // Params can be missing if the native stack restores state oddly — never throw.
   const linkId = route.params?.linkId;
