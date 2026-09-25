@@ -8,7 +8,7 @@ import { Icon, CollectionIcon } from '../../components/Icon';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
-import { sortByTitle } from '../../utils/sort';
+import { sortByLetter } from '../../utils/sort';
 import { themesFor } from '../../theme';
 import { openLinkDetail } from '../../utils/navigateLinkDetail';
 
@@ -24,7 +24,7 @@ export function CollectionViewScreen({ route, navigation }: Props) {
   const collectionLinks = useMemo(
     () =>
       collection
-        ? sortByTitle(links.filter((l) => l.collection_ids?.includes(collection.id)))
+        ? sortByLetter(links.filter((l) => l.collection_ids?.includes(collection.id)))
         : [],
     [links, collection],
   );

@@ -71,7 +71,7 @@ export const mockLinks: Link[] = [
     saved_at: hoursAgo(2),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-read-later'],
-    thumb: { bg: '#fde3ea' },
+    
   },
   {
     id: 'l-2',
@@ -86,7 +86,7 @@ export const mockLinks: Link[] = [
     saved_at: hoursAgo(5),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-work'],
-    thumb: { bg: '#1c1d21', label: 'F', labelColor: '#fff' },
+    thumb: { label: 'F' },
   },
   {
     id: 'l-3',
@@ -101,7 +101,7 @@ export const mockLinks: Link[] = [
     saved_at: daysAgo(1),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-inspiration'],
-    thumb: { gradient: ['#3a3f47', '#15171a'], label: 'A', labelColor: '#fff' },
+    thumb: { label: 'A' },
   },
   {
     id: 'l-4',
@@ -116,7 +116,7 @@ export const mockLinks: Link[] = [
     saved_at: daysAgo(2),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-tools'],
-    thumb: { bg: '#000', label: 'N', labelColor: '#fff' },
+    thumb: { label: 'N' },
   },
   {
     id: 'l-sleep',
@@ -132,7 +132,7 @@ export const mockLinks: Link[] = [
     saved_at: hoursAgo(2),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-read-later'],
-    thumb: { gradient: ['#3a6288', '#0d1c2c'], labelColor: '#fff' },
+    
   },
 ];
 
@@ -151,7 +151,7 @@ export const mockCollectionLinks: Link[] = [
     saved_at: hoursAgo(2),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-read-later'],
-    thumb: { gradient: ['#3a6288', '#0d1c2c'], labelColor: '#fff' },
+    
   },
   {
     id: 'cv-2',
@@ -166,7 +166,7 @@ export const mockCollectionLinks: Link[] = [
     saved_at: daysAgo(1),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-read-later'],
-    thumb: { bg: '#111', label: 'T', labelColor: '#fff', serif: true },
+    thumb: { label: 'T', serif: true },
   },
   {
     id: 'cv-3',
@@ -181,7 +181,7 @@ export const mockCollectionLinks: Link[] = [
     saved_at: daysAgo(3),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-personal'],
-    thumb: { bg: '#dcdfe4' },
+    
   },
   {
     id: 'cv-4',
@@ -196,6 +196,6 @@ export const mockCollectionLinks: Link[] = [
     saved_at: daysAgo(5),
     updated_at: new Date().toISOString(),
     collection_ids: ['c-personal'],
-    thumb: { bg: '#000', label: 'M', labelColor: '#fff' },
+    thumb: { label: 'M' },
   },
 ];

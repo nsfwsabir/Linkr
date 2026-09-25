@@ -30,11 +30,9 @@ export interface Link {
   thumb?: ThumbSpec;
 }
 
+/** List-thumb letter matching the HTML source; tile surface is theme-driven. */
 export interface ThumbSpec {
-  bg?: string;
-  gradient?: [string, string];
   label?: string;
-  labelColor?: string;
   serif?: boolean;
 }
 

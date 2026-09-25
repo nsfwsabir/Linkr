@@ -1,60 +1,43 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRefScale } from '../utils/useRefScale';
 import { formatRelativeTime } from '../utils/time';
+import { linkLetter } from '../utils/linkLetter';
 import { Icon, CollectionIcon } from './Icon';
 import { themesFor } from '../theme';
 import { useTheme } from '../app/providers/ThemeProvider';
 import type { Collection, Link, ThumbSpec } from '../types';
 
-/** First letter of the title, else of the domain — every tile shows an alphabet. */
-function initialFor(link: Link): string {
-  const source = (link.title || link.source_domain || '').trim();
-  return source ? source.charAt(0).toUpperCase() : '#';
-}
-
 /**
- * List tile artwork is always a single letter, per the HTML source's
- * letter/gradient tiles. The seeded `label` wins so the designed letters stay
- * put; anything loaded from Postgres (no `thumb`) falls back to an initial —
- * those rows would otherwise render as empty coloured squares.
+ * List tile artwork is a single letter in the theme's primary text colour on a
+ * neutral surface, so it stays legible in both themes. The letter comes from
+ * linkLetter so the tile and the list sort can never disagree.
  */
 function Thumb({ link }: { link: Link }) {
   const v = useRefScale();
   const { c } = useTheme();
   const spec: ThumbSpec | undefined = link.thumb;
-  const d = v(42);
-  const box = { width: d, height: d, borderRadius: v(13) };
-  const letter = (
-    <Text
-      style={[
-        styles.thumbText,
-        { fontSize: v(14), color: spec?.labelColor ?? c.textPrimary },
-        spec?.serif && { fontFamily: 'serif' },
-      ]}
-    >
-      {spec?.label ?? initialFor(link)}
-    </Text>
-  );
-
-  if (spec?.gradient) {
-    return (
-      <LinearGradient
-        colors={[spec.gradient[0], spec.gradient[1]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.thumb, box]}
-      >
-        {letter}
-      </LinearGradient>
-    );
-  }
   return (
     <View
-      style={[styles.thumb, box, { backgroundColor: spec?.bg ?? c.screenBgAlt }]}
+      style={[
+        styles.thumb,
+        {
+          width: v(42),
+          height: v(42),
+          borderRadius: v(13),
+          backgroundColor: c.screenBgAlt,
+        },
+      ]}
     >
-      {letter}
+      <Text
+        style={[
+          styles.thumbText,
+          { fontSize: v(14), color: c.textPrimary },
+          spec?.serif && { fontFamily: 'serif' },
+        ]}
+      >
+        {linkLetter(link)}
+      </Text>
     </View>
   );
 }

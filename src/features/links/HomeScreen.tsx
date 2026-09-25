@@ -12,7 +12,7 @@ import { LinkListItem } from '../../components/ListItems';
 import { SaveLinkSheet } from '../links/SaveLinkSheet';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
-import { sortByTitle } from '../../utils/sort';
+import { sortByLetter } from '../../utils/sort';
 import { useRefScale } from '../../utils/useRefScale';
 import { openLinkDetail } from '../../utils/navigateLinkDetail';
 
@@ -48,7 +48,7 @@ export function HomeScreen({ navigation }: Props) {
       const matchesFilter = !filterId || l.collection_ids?.includes(filterId);
       return matchesQuery && matchesFilter;
     });
-    return sortByTitle(matches);
+    return sortByLetter(matches);
   }, [query, filterId, links]);
 
   const emptyMessage = filterId
