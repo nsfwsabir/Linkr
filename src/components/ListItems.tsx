@@ -2,30 +2,42 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRefScale } from '../utils/useRefScale';
+import { formatRelativeTime } from '../utils/time';
 import { Icon, CollectionIcon } from './Icon';
 import { themesFor } from '../theme';
 import { useTheme } from '../app/providers/ThemeProvider';
 import type { Collection, Link, ThumbSpec } from '../types';
 
-function Thumb({ spec }: { spec?: ThumbSpec }) {
+/** First letter of the title, else of the domain — every tile shows an alphabet. */
+function initialFor(link: Link): string {
+  const source = (link.title || link.source_domain || '').trim();
+  return source ? source.charAt(0).toUpperCase() : '#';
+}
+
+/**
+ * List tile artwork is always a single letter, per the HTML source's
+ * letter/gradient tiles. The seeded `label` wins so the designed letters stay
+ * put; anything loaded from Postgres (no `thumb`) falls back to an initial —
+ * those rows would otherwise render as empty coloured squares.
+ */
+function Thumb({ link }: { link: Link }) {
   const v = useRefScale();
   const { c } = useTheme();
+  const spec: ThumbSpec | undefined = link.thumb;
   const d = v(42);
-  const inner = spec?.icon ? (
-    <Icon name={spec.icon} size={v(18)} color={spec.iconColor ?? '#fff'} />
-  ) : spec?.label ? (
+  const box = { width: d, height: d, borderRadius: v(13) };
+  const letter = (
     <Text
       style={[
         styles.thumbText,
-        { fontSize: v(14), color: spec.labelColor ?? '#fff' },
-        spec.serif && { fontFamily: 'serif' },
+        { fontSize: v(14), color: spec?.labelColor ?? c.textPrimary },
+        spec?.serif && { fontFamily: 'serif' },
       ]}
     >
-      {spec.label}
+      {spec?.label ?? initialFor(link)}
     </Text>
-  ) : null;
+  );
 
-  const box = { width: d, height: d, borderRadius: v(13) };
   if (spec?.gradient) {
     return (
       <LinearGradient
@@ -34,7 +46,7 @@ function Thumb({ spec }: { spec?: ThumbSpec }) {
         end={{ x: 1, y: 1 }}
         style={[styles.thumb, box]}
       >
-        {inner}
+        {letter}
       </LinearGradient>
     );
   }
@@ -42,7 +54,7 @@ function Thumb({ spec }: { spec?: ThumbSpec }) {
     <View
       style={[styles.thumb, box, { backgroundColor: spec?.bg ?? c.screenBgAlt }]}
     >
-      {inner}
+      {letter}
     </View>
   );
 }
@@ -66,14 +78,14 @@ export const LinkListItem = React.memo(function LinkListItem({
       hitSlop={8}
       style={[styles.row, { gap: v(11), paddingVertical: v(9) }]}
     >
-      <Thumb spec={link.thumb} />
+      <Thumb link={link} />
       <View style={styles.textWrap} pointerEvents="none">
         <Text numberOfLines={1} style={[styles.title, { fontSize: v(12.8), color: c.textPrimary }]}>
           {link.title}
         </Text>
         <Text numberOfLines={1} style={[styles.meta, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
           {link.source_domain}
-          {showDots ? ` · ${link.saved_at}` : ''}
+          {showDots ? ` · ${formatRelativeTime(link.saved_at)}` : ''}
         </Text>
       </View>
       <View style={styles.trailing} pointerEvents="none">
@@ -81,7 +93,7 @@ export const LinkListItem = React.memo(function LinkListItem({
           <Icon name="dots" size={v(16)} color={c.textTertiary} />
         ) : (
           <Text style={[styles.time, { fontSize: v(10.5), color: c.textTertiary }]}>
-            {link.saved_at}
+            {formatRelativeTime(link.saved_at)}
           </Text>
         )}
       </View>

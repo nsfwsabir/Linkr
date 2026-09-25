@@ -9,6 +9,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../providers/AuthProvider';
 import { useTheme } from '../providers/ThemeProvider';
+import { useLinks } from '../providers/LinksProvider';
+import { SyncErrorBanner } from '../../components/States';
 import { BottomNav } from '../../components/BottomNav';
 import { SplashScreen } from '../../features/auth/SplashScreen';
 import { OnboardingScreen } from '../../features/auth/OnboardingScreen';
@@ -62,6 +64,7 @@ function MainTabs() {
 export function RootNavigator() {
   const { session, loading } = useAuth();
   const { dark, c } = useTheme();
+  const { syncError, dismissSyncError } = useLinks();
   const navTheme = {
     ...(dark ? DarkTheme : DefaultTheme),
     colors: {
@@ -78,36 +81,41 @@ export function RootNavigator() {
   }
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          // Match screen bg so the native window never flashes white mid-push.
-          contentStyle: { backgroundColor: c.screenBg },
-          // Android: fade_from_bottom intermittently left LinkDetail mounted
-          // but stuck at fromAlpha=0 (pure white) under new-arch draw-reorder.
-          // `none` matches tabs — reliable paint, no blur blank, no stutter.
-          // iOS keeps simple_push (animationDuration is iOS-only).
-          animation: Platform.OS === 'ios' ? 'simple_push' : 'none',
-          animationDuration: Platform.OS === 'ios' ? 200 : undefined,
-          autoHideHomeIndicator: true,
-        }}
-      >
-        {session ? (
-          <>
-            <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen name="CollectionView" component={CollectionViewScreen} />
-            <Stack.Screen name="LinkDetail" component={LinkDetailScreen} />
-            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Splash" component={SplashScreen} />
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-            <Stack.Screen name="SignIn" component={SignInScreen} />
-            <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-          </>
-        )}
-      </Stack.Navigator>
+      <View style={{ flex: 1 }}>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            // Match screen bg so the native window never flashes white mid-push.
+            contentStyle: { backgroundColor: c.screenBg },
+            // Android: fade_from_bottom intermittently left LinkDetail mounted
+            // but stuck at fromAlpha=0 (pure white) under new-arch draw-reorder.
+            // `none` matches tabs — reliable paint, no blur blank, no stutter.
+            // iOS keeps simple_push (animationDuration is iOS-only).
+            animation: Platform.OS === 'ios' ? 'simple_push' : 'none',
+            animationDuration: Platform.OS === 'ios' ? 200 : undefined,
+            autoHideHomeIndicator: true,
+          }}
+        >
+          {session ? (
+            <>
+              <Stack.Screen name="Main" component={MainTabs} />
+              <Stack.Screen name="CollectionView" component={CollectionViewScreen} />
+              <Stack.Screen name="LinkDetail" component={LinkDetailScreen} />
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Splash" component={SplashScreen} />
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="SignIn" component={SignInScreen} />
+              <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+        {syncError ? (
+          <SyncErrorBanner message={syncError} onDismiss={dismissSyncError} />
+        ) : null}
+      </View>
     </NavigationContainer>
   );
 }

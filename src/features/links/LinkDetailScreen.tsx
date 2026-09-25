@@ -12,6 +12,7 @@ import { faviconUrl } from '../../utils/url';
 import { useLinks } from '../../app/providers/LinksProvider';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useRefScale } from '../../utils/useRefScale';
+import { formatRelativeTime } from '../../utils/time';
 import { colors, themesFor } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LinkDetail'>;
@@ -243,7 +244,7 @@ export function LinkDetailScreen({ route, navigation }: Props) {
           <View>
             <Text style={[styles.rowText, { fontSize: v(12.8), color: c.textPrimary }]}>Saved</Text>
             <Text style={[styles.sub, { fontSize: v(11), marginTop: v(2), color: c.textTertiary }]}>
-              {link.saved_at}
+              {formatRelativeTime(link.saved_at)}
               {collection ? ` · ${collection.name}` : ''}
             </Text>
           </View>
